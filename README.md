@@ -6,6 +6,8 @@ It explores where dense neighbourhoods have a long walk to recorded transport, a
 
 **The results are provisional.** The routes are modelled candidates, not proposed services or a transport plan. Costs and demand are placeholders. Nothing has been checked in the field or reviewed by operators. Taxi operators and boda riders are central to transport here, and any feeder would need to be developed with them.
 
+Working draft for a supervisor and research team. It shows all study layers, including candidate zones and modelled taxi integration risk. Those risk ratings are judgements from open data, not findings about any operator or association.
+
 ## Data sources
 - OpenStreetMap contributors (ODbL)
 - Kampala route file by Transport for Cairo, via Digital Transport for Africa (2019/20)
