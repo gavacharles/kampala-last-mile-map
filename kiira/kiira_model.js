@@ -327,6 +327,8 @@
       ridersDay: sum((r) => r.ev.riders), deniedDay: sum((r) => r.ev.denied.reduce((a, b) => a + b, 0)),
       revenueDay: sum((r) => r.ev.rev), revenueYr: sum((r) => r.c.revenue), opexYr: sum((r) => r.c.opex),
       annCapexYr: sum((r) => r.c.annVeh + r.c.annChg), profitYr: sum((r) => r.c.profit), ebitdaYr: sum((r) => r.c.ebitda),
+      energyYr: sum((r) => r.c.energy), driversYr: sum((r) => r.c.drivers), maintYr: sum((r) => r.c.maint), insuranceYr: sum((r) => r.c.insurance),
+      payYr: sum((r) => r.c.pay), fixedYr: sum((r) => r.c.fixed), vehAnnYr: sum((r) => r.c.annVeh), chgAnnYr: sum((r) => r.c.annChg),
       ancillaryYr: sum((r) => r.c.ancillary), fareRevenueYr: sum((r) => r.c.fareRevenue), cityCostYr: sum((r) => r.c.cityCost),
       fleet: sum((r) => r.c.fleet), inService: sum((r) => r.N), shuttles: sum((r) => (r.vk === "shuttle" ? r.c.fleet : 0)), midis: sum((r) => (r.vk === "midi" ? r.c.fleet : 0)),
       vehCapex: sum((r) => r.c.vehCapex), chargerCapex: sum((r) => r.c.chargerCapex),
