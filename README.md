@@ -14,3 +14,7 @@ Working draft for a supervisor and research team. It shows all study layers, inc
 - WorldPop 2020 (CC BY 4.0), scaled to the 2024 census
 - GHSL R2023A; Copernicus DEM; geoBoundaries; Meta Relative Wealth Index
 - Esri and partners for imagery and basemaps
+
+## Kiira EV last-mile model
+
+How Kiira Vehicle Plant electric feeders could close the last mile for 100 Greater Kampala suburbs: demand, dynamic pricing, scenarios, value proposition and charging network. Open [kiira/](https://gavacharles.github.io/kampala-last-mile-map/kiira/).
