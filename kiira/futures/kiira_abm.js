@@ -65,9 +65,14 @@
     // Households and bodas
     incomeBase: 900000, incomeRwi: 0.8, incomeSd: 0.55,
     bodaTripsDay: MD.bodaTripsDay, bodaKmTrip: 2.2, bodaRent: 15000, bodaFuelL: 5200, bodaLitreKm: MD.bodaLitreKm, bodaReserve: 22000, bodaExit: 0.04, bodaPriceWar: 0.12, exBodaHire: 0.6,
-    // Aggregator
-    shopsPer: 70, shopJoinBase: -2.2, orderValue: 15000, ordersWeek: 1.6, deliveryFee: 800, commission: 0.06, incremental: 0.45, shopMargin: 0.2,
-    courierOrdersDay: 40, orderCeil: 0.35, shopCeil: 0.6, shopKm: 0.6, shopBodaShare: 0.25, courierDay: 28000, parcelFee: 250, aggTechMonthly: 6000000, orderBassP: 0.01, orderBassQ: 0.35,
+    // Aggregator. Modes: A door delivery, B pickup at the stop, C shop restocking from the wholesale district, BC = B + C.
+    shopsPer: 70, shopJoinBase: -2.2, orderValue: 15000, ordersWeek: 1.6, commission: 0.06, incremental: 0.4, shopMargin: 0.2,
+    feeA: 800, feeB: 300, dropFee: 1000, dropsPerCourier: 40, orderCeil: 0.35, shopCeil: 0.6, shopKm: 0.6, shopBodaShare: 0.25, orderBassP: 0.01, orderBassQ: 0.35,
+    cacHH: 5000, cacShop: 30000, churnHH: 0.03, churnShop: 0.02, momoFee: 0.015, aggTechMonthly: 6000000, hubAgentMonthly: 600000,
+    lockerUsd: 1500, stopSpacingKm: 0.4, lockerLife: 6,
+    restockWeek: 1.5, restockValue: 300000, restockCeil: 0.5, restockFee: 4000, hopFee: 2500, wholesaleMargin: 0.015, restockHours: 3, shopHourValue: 4000, wholesaleMaxKm: 7, momoCap: 2500,
+    creditShare: 0.5, creditMonthly: 0.05, capitalCost: 0.18, defaultRate: 0.015,
+    totesOrder: 0.3, totesRestock: 3, toteFee: 600, haulPerToteKm: 110, haulTotesRun: 20, haulRunsPerIdleVeh: 4, rackTotes: 4, rackUsd: 1200, seatTote: 0.5, cargoHours: [9, 10, 11, 12, 13, 14, 15, 19, 20], midMax: 0.3,
     // Wider effects
     bodaKgKm: MD.bodaKgKm, gridKgKwh: MD.gridKgKwh, dieselKgL: 2.68, plantJobsPerUnit: MD.plantJobsPerUnit, techPerVeh: 0.35, salesPerShopJob: 12000000,
     trunkMin: 28, cbdKmh: 14,
@@ -87,6 +92,14 @@
     { key: "bodaReserve", label: "Boda riders' fallback pay (UGX/day)", lo: 16000, hi: 30000 },
     { key: "orderBassQ", label: "Uptake of ordering", lo: 0.15, hi: 0.55 },
     { key: "driverMonthly", label: "Driver pay (UGX/month)", lo: 550000, hi: 950000 },
+    { key: "orderValue", label: "Household order value (UGX)", lo: 10000, hi: 25000 },
+    { key: "orderCeil", label: "Households that would ever order", lo: 0.2, hi: 0.5 },
+    { key: "dropsPerCourier", label: "Deliveries per courier per day", lo: 25, hi: 60 },
+    { key: "incremental", label: "Share of sales that are new (not moved from other shops)", lo: 0.2, hi: 0.6 },
+    { key: "restockValue", label: "Shop restock order (UGX)", lo: 200000, hi: 500000 },
+    { key: "restockCeil", label: "Shops that would ever restock this way", lo: 0.3, hi: 0.7 },
+    { key: "defaultRate", label: "Stock-credit defaults per loan", lo: 0.005, hi: 0.03 },
+    { key: "haulPerToteKm", label: "Hired van haulage (UGX per tote-km)", lo: 60, hi: 180 },
   ];
 
   function merge(a, b) { const o = JSON.parse(JSON.stringify(a)); for (const k in b || {}) o[k] = b[k] && typeof b[k] === "object" && !Array.isArray(b[k]) ? Object.assign({}, o[k], b[k]) : b[k]; return o; }
@@ -100,6 +113,8 @@
     const c = Math.floor((P.bodaCapShare * bodaFare(P, Math.max(s.lm_gap_km, 0.55))) / P.fareStep) * P.fareStep;
     return pricing === "inclusive" && s.rwi < P.incl.lowRwi ? Math.min(c, P.incl.lowCap) : c;
   };
+  const wsKm = (s, P) => Math.min(s.d_cbd_km * 1.3, P.wholesaleMaxKm); // road km to the nearest wholesale cluster (Kikuubo/Owino or a suburban one)
+  const hhOrdersOf = (m) => /[AB]/.test(m || "");
   const optionsFor = (s) => ["e14", "ice14"].concat(midiOk(s) ? ["midi"] : []);
 
   /* Build a suburb's households. Same seed => same people across options, so differences are the policy's. */
@@ -133,7 +148,8 @@
     const P = Pin;
     const R = rng(seed);
     const V = VEH[opt.vehicle];
-    const pricing = opt.pricing, agg = !!opt.agg;
+    const pricing = opt.pricing, aggM = opt.agg || "0";
+    const agg = aggM !== "0", door = aggM.includes("A"), pickup = aggM.includes("B"), restock = aggM.includes("C"), hhOrders = door || pickup;
     const discount = pricing === "inclusive" ? P.incl.discount : 0;
     const vot0 = P.vot * Math.exp(P.votRwi * (s.rwi - 1.2)) / 60;
     const mu0 = P.mu * Math.exp(-P.muRwi * (s.rwi - 1.2));
@@ -177,7 +193,7 @@
     // Baseline (no feeder, no aggregator): logsum and spending per household-day
     for (const a of A) {
       const ra = roundTrip(a, a.hA, 0, -1, false), rb = roundTrip(a, a.hB, 0, -1, false);
-      a.modeA = R() < ra.e[1] / ra.S ? 1 : 0; a.modeB = R() < rb.e[1] / rb.S ? 1 : 0;
+      a.modeA = R() < ra.e[1] / ra.S ? 1 : 0; a.modeB = R() < rb.e[1] / rb.S ? 1 : 0; a.m0 = [a.modeA, a.modeB];
       a.base = {
         ls: (a.alignA ? a.tripsA * Math.log(ra.S) / ra.mu : 0) + (a.alignB ? a.tripsB * Math.log(rb.S) / rb.mu : 0),
         spend: (a.alignA ? a.tripsA * ra.money[1] * ra.e[1] / ra.S : 0) + (a.alignB ? a.tripsB * rb.money[1] * rb.e[1] / rb.S : 0),
@@ -212,8 +228,11 @@
     const fleetAdds = []; // [week, n]
     fleetAdds.push([0, Math.ceil(N * (1 + P.spare))]);
     // Aggregator state
-    const shops = s.pop / P.shopsPer;
-    let shopsOn = 0, adopters = 0;
+    const shops = s.pop / P.shopsPer, hhAll = s.pop / P.hhSize;
+    const near = s.near300 != null ? s.near300 : 0.33; // share of shops within 300 m of the feeder route (mapped OSM shops)
+    const cargoK = P.cargoHours.map(HI).filter((k) => k >= 0);
+    let shopsOn = 0, adopters = 0, rsOn = 0, midX = 0, quality = 1, courierPay = 0;
+    const ldH = new Array(NH).fill(0);
     const T = [], weekly = [];
     let bodaKmW = bodaKm0;
     let awareShare = 0, userShare = 0;
@@ -227,6 +246,7 @@
       let ls = 0, spend = 0, bodaLegs = 0, bodaKm = 0, users = 0, aware = 0, mins = 0;
       const wt = A[0].w;
       for (const a of A) {
+        a.lsW = 0;
         if (!a.aware && R() < pAware) a.aware = true;
         if (a.aware) aware++;
         for (const slot of [0, 1]) {
@@ -242,7 +262,7 @@
           // welfare without habit terms: recompute plain logsum
           const mu = r.mu, asc2 = (P.ascShuttle + a.asc) / mu;
           const plain = Math.exp(-mu * r.g[0]) + Math.exp(-mu * r.g[1]) + (a.aware && N > 0 ? Math.exp(-mu * (r.g[2] - asc2)) : 0);
-          ls += a.w * trips * Math.log(plain) / mu;
+          ls += a.w * trips * Math.log(plain) / mu; a.lsW += trips * Math.log(plain) / mu;
           spend += a.w * trips * (pr[1] * r.money[1] + pr[2] * r.money[2]);
           if (m === 2) users++;
           dem[hrs[0]] += a.w * trips * pr[2]; dem[hrs[1]] += a.w * trips * pr[2];
@@ -265,13 +285,13 @@
         rev += S * (paid);
         perRev[pi] += S * paid; perServ[pi] += S;
         const ld = capDir > 0 ? (dem[k] * DIR[k]) / capDir : 0;
-        perLoad[pi] = Math.max(perLoad[pi], ld);
+        perLoad[pi] = Math.max(perLoad[pi], ld); ldH[k] = ld;
         peakLoad = Math.max(peakLoad, Math.min(ld, 1.5));
-        vkm += Math.max(N * DEPLOY[k], N > 0 ? 1 : 0) * (60 / cycleH[k]) * 2 * s.route_km;
+        vkm += (Math.max(N * DEPLOY[k], N > 0 ? 1 : 0) + (cargoK.includes(k) ? N * midX : 0)) * (60 / cycleH[k]) * 2 * s.route_km;
       }
       const cityCost = served * discount;
       // Bodas respond
-      const pay = bodaNet(bodaLegs, B);
+      const pay = bodaNet(bodaLegs, B) + (0.85 * courierPay) / Math.max(B, 1); // courier drops (net of fuel) are shared by the boda pool
       bodaKmW = bodaKm;
       if (pay < P.bodaReserve && B > 1) {
         const leave = B * P.bodaExit * Math.min(1, (P.bodaReserve - pay) / P.bodaReserve * 3);
@@ -280,18 +300,47 @@
       } else if (pay > P.bodaReserve * 1.3 && B < B0) { B += B * 0.01; bodaLeft = Math.max(0, bodaLeft - B * 0.01); }
       bodaWaitMult = Math.sqrt(Math.max(0.5, B0 / Math.max(B, 1) * (bodaLegs / Math.max(bodaLegs0, 1))));
       // Aggregator
-      let orders = 0, couriers = 0;
+      let orders = 0, drops = 0, couriers = 0, totesDem = 0, totesCap = 0, totesServed = 0, newHH = 0, newShops = 0;
+      courierPay = 0;
       if (agg && N > 0) {
-        const orderers = adopters;
-        orders = orderers * P.ordersWeek / 6; // per day
-        couriers = orders / P.courierOrdersDay;
-        const perShop = orders / Math.max(shopsOn, 1);
-        const gain = perShop * P.orderValue * P.incremental * P.shopMargin - perShop * P.orderValue * P.commission;
-        const pJoin = 1 / (1 + Math.exp(-(P.shopJoinBase + gain / 1500 + 3 * (shopsOn / shops))));
-        if (wk % 4 === 0) shopsOn = Math.min(shops * P.shopCeil, shopsOn + (shops * P.shopCeil - shopsOn) * pJoin * 0.25);
-        const hhAll = s.pop / P.hhSize;
-        const pAdopt = 1 - Math.exp(-(P.orderBassP + P.orderBassQ * adopters / hhAll) * Math.min(1, shopsOn / (shops * 0.3)));
-        adopters = Math.min(hhAll * P.orderCeil, adopters + (hhAll * P.orderCeil - adopters) * pAdopt);
+        // Cargo room off-peak: a rack on every vehicle plus half the empty seats on each run towards the suburb, plus extra midday runs.
+        for (const k of cargoK) { const runs = N * (DEPLOY[k] + midX) * 60 / cycleH[k]; totesCap += runs * (P.rackTotes + V.cap * Math.max(0, 1 - ldH[k]) * P.seatTote); }
+        if (hhOrders) {
+          orders = adopters * P.ordersWeek / 6;
+          const perShop = orders / Math.max(shopsOn, 1);
+          const gain = perShop * P.orderValue * (P.incremental * P.shopMargin - P.commission);
+          const pJoin = 1 / (1 + Math.exp(-(P.shopJoinBase + gain / 1500 + 3 * (shopsOn / shops))));
+          if (wk % 4 === 0) { const add = Math.max(0, (shops * P.shopCeil - shopsOn) * pJoin * 0.25); newShops += add; shopsOn = (shopsOn + add) * (1 - P.churnShop); }
+          // Pickup at the stop suits households who already ride the feeder; door delivery suits everyone.
+          const ceil = hhAll * P.orderCeil * (door ? 1 : Math.min(1.3, 0.6 + 1.5 * userShare));
+          const pAdopt = (1 - Math.exp(-(P.orderBassP + P.orderBassQ * adopters / hhAll) * Math.min(1, shopsOn / (shops * 0.3)))) * quality;
+          newHH = Math.max(0, (ceil - adopters) * pAdopt);
+          adopters = Math.max(0, adopters + newHH - adopters * (P.churnHH / 4.33) * (2 - quality));
+        }
+        if (restock) {
+          drops = rsOn * P.restockWeek / 6;
+          if (wk % 4 === 0) {
+            // A shop's own restock trip: a boda to the wholesale district and back with the goods, plus the hours the shop is shut.
+            const tripCost = 2 * bodaFare(P, wsKm(s, P)) + P.restockHours * P.shopHourValue;
+            const fee = P.restockFee + (1 - near) * P.hopFee;
+            const saveM = P.restockWeek * 4.33 * (tripCost - fee) + P.creditShare * P.restockValue * P.shopMargin * 0.25;
+            const pJ = quality / (1 + Math.exp(-(-2.5 + saveM / 40000)));
+            const add = Math.max(0, (shops * P.restockCeil - rsOn) * pJ * 0.3); newShops += add;
+            rsOn = Math.max(0, rsOn + add - rsOn * P.churnShop * (2 - quality));
+          }
+        }
+        totesDem = orders * P.totesOrder + drops * P.totesRestock;
+        totesServed = Math.min(totesDem, totesCap);
+        if (totesDem > 0) quality = 0.7 * quality + 0.3 * (totesServed / totesDem);  // late deliveries slow take-up and raise churn
+        courierPay = (door ? orders * P.dropFee : 0) + drops * (1 - near) * P.hopFee;
+        couriers = ((door ? orders : 0) + drops * (1 - near) * 2) / P.dropsPerCourier;  // a shop hop counts as two door drops
+        // Operator: extra midday runs when tote fees beat the cost of the extra kilometres (cheaper per km for electric).
+        if (wk % 4 === 2) {
+          const kmCost = V.electric ? V.kwhKm * (1 + P.chargeLoss) * P.tariffOff * 1.08 * P.tariffMult + V.maintKm : V.lKm * P.diesel + V.maintKm;
+          const runRev = (P.rackTotes + V.cap * P.seatTote * 0.6) * P.toteFee, runCost = 2 * s.route_km * kmCost;
+          if (totesDem > totesServed * 1.02 && runRev > 1.2 * runCost) midX = Math.min(P.midMax, midX + 0.05);
+          else if (totesDem < totesCap * 0.6) midX = Math.max(0, midX - 0.05);
+        }
       }
       const drivers = N * P.driversPerVeh;
       bodaToDriver = Math.min(bodaLeft * P.exBodaHire, drivers);
@@ -317,12 +366,20 @@
       const w = {
         wk, N, served, refused, rev, cityCost, vkm, aware: awareShare, share: served / Math.max(s.pop * P.legRate * P.demandMult, 1),
         fares: fares.slice(), boda: B, bodaPay: pay, bodaMult, orders, shopsOn, adopters, couriers, drivers, bodaToDriver, bodaToCourier,
+        drops, rsOn, totesDem, totesCap, totesServed, newHH, newShops, courierPay, midX, quality, userShare,
         ls, spend, peakLoad, servedH, bodaKm: bodaKmW, bodaKm0,
       };
       T.push(w);
-      if (record) weekly.push({ wk, N, served: Math.round(served), boda: Math.round(B), orders: Math.round(orders), fare: Math.round(rev / Math.max(served, 1)), aware: +awareShare.toFixed(3) });
+      if (record) weekly.push({ wk, N, served: Math.round(served), boda: Math.round(B), orders: Math.round(orders), drops: Math.round(drops), fare: Math.round(rev / Math.max(served, 1)), aware: +awareShare.toFixed(3) });
     }
-    return summarise(s, P, opt, A, T, fleetAdds, B0, bodaPay0, maxFleet, record ? weekly : null, cap);
+    const out = summarise(s, P, opt, A, T, fleetAdds, B0, bodaPay0, maxFleet, record ? weekly : null, cap);
+    if (record === "agents") {
+      // One row per sample household for the scrolling story: income, far from road, baseline and final modes (0 walk, 1 boda, 2 feeder), gain (UGX/month), orders?
+      const month = P.days / 12, pOrder = out.adopters / hhAll;
+      out.agents = A.map((a) => [Math.round(a.inc / 1000), a.far ? 1 : 0, a.alignA ? a.m0[0] : 3, a.alignB ? a.m0[1] : 3, a.alignA ? a.modeA : 3, a.alignB ? a.modeB : 3,
+        Math.round(((a.lsW || 0) - a.base.ls) * month / 100) * 100, R() < pOrder ? 1 : 0, +a.d.toFixed(2)]);
+    }
+    return out;
   }
 
   /* Money, families, jobs and climate from the simulated weeks. */
@@ -332,11 +389,14 @@
     const avg = (f) => last.reduce((a, w) => a + f(w), 0) / last.length;
     const N = Math.round(avg((w) => w.N));
     const fleet = Math.ceil(N * (1 + P.spare)); // steady-state fleet; vehicles bought and later released are in the cash flow
-    const ridersDay = avg((w) => w.served), revDay = avg((w) => w.rev), vkmDay = avg((w) => w.vkm), orders = avg((w) => w.orders);
+    const ridersDay = avg((w) => w.served), revDay = avg((w) => w.rev), vkmDay = avg((w) => w.vkm), orders = avg((w) => w.orders), drops = avg((w) => w.drops);
+    const aggM = opt.agg || "0", agg = aggM !== "0", door = aggM.includes("A"), pickup = aggM.includes("B"), restock = aggM.includes("C");
+    const totes = avg((w) => w.totesServed), totesDem = avg((w) => w.totesDem), totesCap = avg((w) => w.totesCap), midX = avg((w) => w.midX);
     const grant = opt.pricing === "inclusive" && V.electric ? P.incl.grant : 0;
     const priceMult = V.electric ? P.capexMult : P.iceMult;
     const usdVeh = V.usd * priceMult;
-    const vehCapex = fleet * usdVeh * P.fx * (1 - grant);
+    const rack = agg ? P.rackUsd : 0; // cargo rack and fold-up seats when the vehicle also carries totes
+    const vehCapex = fleet * (usdVeh + rack) * P.fx * (1 - grant);
     let energy, chargerCapex = 0, kwhDay = 0, battery = 0, fuelL = 0;
     if (V.electric) {
       kwhDay = vkmDay * V.kwhKm * (1 + P.chargeLoss);
@@ -349,9 +409,20 @@
     const insurance = fleet * usdVeh * P.fx * P.insurance;
     const fixed = fleet * P.fixedPerVeh;
     const idleVh = N * HOURS.reduce((a, h, k) => a + (1 - DEPLOY[k]), 0);
-    const ancillary = idleVh * P.ancillaryRate * P.ancillaryUtil * P.days * (opt.agg ? 0.6 : 1); // some idle time goes to parcels
-    const parcel = opt.agg ? orders * P.parcelFee * P.days : 0;
-    const revenue = revDay * P.days + ancillary + parcel;
+    const ancillary = idleVh * P.ancillaryRate * P.ancillaryUtil * P.days * (agg ? 0.6 : 1); // some idle time goes to totes
+    const parcel = totes * P.toteFee * P.days; // tote fees the platform pays the operator
+    // Wholesale haul: restock totes go from the wholesale cluster to the hub. The platform pays the hired-van rate; the operator takes the job with
+    // its idle midday vehicles (seats folded, ~20 totes a run) when that is cheaper than the rate, which depends on cost per km: electric yes, diesel rarely.
+    const haulKm = wsKm(s, P), haulTotes = restock ? drops * P.totesRestock * Math.min(1, totes / Math.max(totesDem, 1e-9)) : 0, haulPrice = P.haulPerToteKm * haulKm;
+    const kmCostV = V.electric ? V.kwhKm * (1 + P.chargeLoss) * P.tariffOff * 1.08 * P.tariffMult + V.maintKm : V.lKm * P.diesel + V.maintKm;
+    const vehPerTote = (2 * haulKm * kmCostV) / P.haulTotesRun;
+    const runsAvail = N * (1 - DEPLOY[HI(12)]) * P.haulRunsPerIdleVeh;
+    const oppPerTote = (1.5 * P.ancillaryRate * P.ancillaryUtil) / P.haulTotesRun; // private hire those idle hours would otherwise earn
+    const opHaul = haulTotes > 0 && vehPerTote + oppPerTote < haulPrice ? Math.min(1, runsAvail * P.haulTotesRun / haulTotes) : 0; // share of haul the operator does
+    const haulRuns = haulTotes * opHaul / P.haulTotesRun;
+    const haulMargin = P.days * (haulTotes * opHaul * haulPrice - haulRuns * 2 * haulKm * kmCostV - haulRuns * 1.5 * P.ancillaryRate * P.ancillaryUtil); // less the private hire those hours would have earned
+    const revenue = revDay * P.days + ancillary + parcel + haulMargin; // haul margin is net of its own running costs
+
     const opex = (energy + drivers + maint + insurance + fixed + revenue * P.payFee) * (1 + P.overhead);
     const annVeh = (vehCapex * (1 - P.residual / Math.pow(1 + P.rate, P.life)) + battery / Math.pow(1 + P.rate, P.battYear)) * crf(P.rate, P.life);
     const annChg = chargerCapex * crf(P.rate, P.chargerLife);
@@ -366,7 +437,7 @@
       cf[t] = revenue * k - opex * (0.5 + 0.5 * nk);
     }
     // purchases, and vehicles released when demand is lower than planned (sold or moved on at 70% of cost)
-    fleetAdds.forEach(([wk, n]) => { const t = Math.min(H - 1, Math.floor(wk / 52)); cf[t] -= n * usdVeh * P.fx * (1 - grant) * (n < 0 ? 0.7 : 1); });
+    fleetAdds.forEach(([wk, n]) => { const t = Math.min(H - 1, Math.floor(wk / 52)); cf[t] -= n * (usdVeh + rack) * P.fx * (1 - grant) * (n < 0 ? 0.7 : 1); });
     cf[0] -= chargerCapex;
     if (battery) cf[Math.min(H - 1, P.battYear)] -= battery;
     cf[H - 1] += vehCapex * P.residual;
@@ -387,22 +458,42 @@
     const exBodaDrivers = avg((w) => w.bodaToDriver), exBodaCouriers = avg((w) => w.bodaToCourier);
     const bodaEarnChangeM = ((Bend * bodaPay - B0 * bodaPay0) * month) / Math.max(B0, 1); // per original rider, per month
     // Aggregator
-    const adopters = avg((w) => w.adopters), shopsOn = avg((w) => w.shopsOn), couriers = orders / P.courierOrdersDay;
-    // Each order replaces a shopping round trip: time on foot, or a boda there and back for some.
+    const adopters = avg((w) => w.adopters), shopsOn = avg((w) => w.shopsOn), rsOn = avg((w) => w.rsOn), couriersFte = avg((w) => w.couriers), courierPayDay = avg((w) => w.courierPay);
+    const near = s.near300 != null ? s.near300 : 0.33, uShare = avg((w) => w.userShare);
     const votS = P.vot * Math.exp(P.votRwi * (s.rwi - 1.2)) / 60;
-    const savePerOrder = (2 * P.shopKm / P.walkKmh) * 60 * votS * (1 - P.shopBodaShare) + P.shopBodaShare * 2 * bodaFare(P, P.shopKm) - P.deliveryFee;
+    // Each household order replaces a shopping round trip (on foot, or by boda for some). Pickup means a walk to the stop for those not riding anyway.
+    const trip = (2 * P.shopKm / P.walkKmh) * 60 * votS * (1 - P.shopBodaShare) + P.shopBodaShare * 2 * bodaFare(P, P.shopKm);
+    const savePerOrder = door ? trip - P.feeA : pickup ? trip - P.feeB - (1 - Math.min(1, 2 * uShare)) * (2 * 0.35 / P.walkKmh) * 60 * votS : 0;
     const aggAdopterM = adopters > 0 ? P.ordersWeek * (52 / 12) * savePerOrder : 0; // per ordering household
     const aggHHm = aggAdopterM * adopters / hh; // averaged over all households
     const shopGainM = shopsOn > 0 ? (orders * P.orderValue * (P.incremental * P.shopMargin - P.commission) * month) / shopsOn : 0;
-    const platformYr = opt.agg ? orders * P.days * (P.orderValue * P.commission + P.deliveryFee - P.parcelFee - P.courierDay / P.courierOrdersDay) - P.aggTechMonthly * 12 * (s.pop / 150000) : 0;
-    const shopJobs = opt.agg ? (orders * P.orderValue * P.incremental * month) / P.salesPerShopJob : 0;
+    const tripCost = 2 * bodaFare(P, wsKm(s, P)) + P.restockHours * P.shopHourValue;
+    const restockSaveM = restock ? P.restockWeek * (52 / 12) * (tripCost - P.restockFee - (1 - near) * P.hopFee) + P.creditShare * P.restockValue * P.shopMargin * 0.25 : 0; // per restocking shop
+    // Platform: fees, commissions and credit interest, less tote fees, couriers, mobile money, haulage, customer acquisition, tech, staff, lockers, credit costs.
+    const valB2C = orders * P.orderValue, valC = drops * P.restockValue;
+    const outstanding = valC * P.creditShare * 14; // two weeks of credit on restock orders
+    const pRev = P.days * (valB2C * P.commission + orders * (door ? P.feeA : pickup ? P.feeB : 0) + valC * P.wholesaleMargin + drops * P.restockFee) + outstanding * P.creditMonthly * 12;
+    const stops = Math.max(2, Math.round(s.route_km / P.stopSpacingKm));
+    const lockers = pickup ? stops * P.lockerUsd * P.fx * crf(P.rate, P.lockerLife) : 0;
+    const cac = 52 * (avg((w) => w.newHH) * P.cacHH + avg((w) => w.newShops) * P.cacShop);
+    const momo = orders * Math.min(P.orderValue * P.momoFee, P.momoCap) + drops * Math.min(P.restockValue * P.momoFee, P.momoCap);
+    const pCost = P.days * (totes * P.toteFee + courierPayDay + momo + haulTotes * haulPrice)
+      + cac + (agg ? P.aggTechMonthly * 12 * (s.pop / 150000) + P.hubAgentMonthly * 12 : 0) + lockers + outstanding * P.capitalCost + valC * P.creditShare * P.days * P.defaultRate;
+    const platformYr = agg ? pRev - pCost : 0;
+    const shopJobs = hhOrdersOf(aggM) ? (valB2C * P.incremental * month) / P.salesPerShopJob : 0;
+    const divertedM = valB2C * (1 - P.incremental) * month; // sales moved from other shops and markets, per month
+    // Couriers: boda riders take courier work in spare time first (about a quarter of a full day each); the rest are new jobs.
+    const Bend0 = avg((w) => w.boda);
+    const couriers = Math.max(0, couriersFte - Bend0 * 0.25);
+    const bodaCourierM = courierPayDay * 0.85 * month / Math.max(Bend0, 1); // courier income per boda rider per month
     // Jobs
     const jDrivers = N * P.driversPerVeh, jTech = fleet * P.techPerVeh, jPlant = V.local ? fleet * P.plantJobsPerUnit : 0;
-    const jobs = { drivers: jDrivers, tech: jTech, plant: jPlant, couriers, shops: shopJobs, boda: -bodaJobsLost };
-    jobs.net = jDrivers + jTech + jPlant + couriers + shopJobs - bodaJobsLost;
+    const hubJobs = agg ? 1 + (restock ? 1 : 0) : 0;
+    const jobs = { drivers: jDrivers, tech: jTech, plant: jPlant, couriers: couriers + hubJobs, shops: shopJobs, boda: -bodaJobsLost };
+    jobs.net = jDrivers + jTech + jPlant + couriers + hubJobs + shopJobs - bodaJobsLost;
     // Climate: boda km avoided, minus feeder energy
     const bodaKmCut = avg((w) => w.bodaKm0 - w.bodaKm);
-    const co2 = (bodaKmCut * P.bodaKgKm - (V.electric ? kwhDay * P.gridKgKwh : vkmDay * V.lKm * P.dieselKgL) - (opt.agg ? couriers * 30 * 0.02 : 0)) * P.days / 1000;
+    const co2 = (bodaKmCut * P.bodaKgKm - (V.electric ? kwhDay * P.gridKgKwh : vkmDay * V.lKm * P.dieselKgL) - couriersFte * 40 * P.bodaLitreKm * 2.3) * P.days / 1000; // couriers ride ~40 km a day on petrol bodas
     const fuelImportUsd = (V.electric ? 0 : fuelL * 1.0) * 0.85; // ~USD 0.85 per litre landed
     const r = {
       opt, N, fleet, ridersDay, revDay, avgFare: revDay / Math.max(ridersDay, 1), fares: T[T.length - 1].fares, fareCap: cap,
@@ -411,6 +502,8 @@
       costPerRide: (opex + annVeh + annChg) / Math.max(ridersDay * P.days, 1), costPerSeatKm: (opex + annVeh + annChg) / Math.max(vkmDay * P.days * VEH[opt.vehicle].cap, 1),
       welfareHHm, spendHHm, terc, bodaPct: bodaEarnChangeM / Math.max(1, bodaPay0 * month), bodaB0: B0, bodaEnd: Bend, bodaPay0, bodaPay, bodaEarnChangeM, exBodaDrivers, exBodaCouriers,
       orders, adopters, shopsOn, shops: s.pop / P.shopsPer, couriers, aggHHm, aggAdopterM, bodaKmCut, shopGainM, platformYr,
+      drops, rsOn, restockSaveM, restockValDay: valC, couriersFte, totes, totesDem, cargoUse: totes / Math.max(totesCap, 1), lateShare: totesDem > 0 ? 1 - totes / totesDem : 0, midX,
+      bodaCourierM, divertedM, shopFamHHm: ((restock ? restockSaveM * rsOn : 0) + shopGainM * shopsOn) / hh, platformRev: pRev, platformCost: pCost, cargoRevYr: parcel + haulMargin, haulOp: opHaul, haulMargin, haulTotes, utilisation: (HOURS.reduce((a, h, k) => a + DEPLOY[k], 0) + midX * P.cargoHours.length) / NH,
       jobs, co2, weekly,
       routeRiders: ridersDay, routeKm: s.route_km, servedH: T[T.length - 1].servedH.map((x) => Math.round(x)),
     };
@@ -434,8 +527,10 @@
   function draw(R, base, U) { const p = Object.assign({}, base); (U || UNCERTAIN).forEach((u) => (p[u.key] = u.lo + (u.hi - u.lo) * R())); return p; }
 
   const OPTIONS = [];
-  ["e14", "midi", "ice14"].forEach((v) => ["flat", "learn", "inclusive"].forEach((p) => [false, true].forEach((g) => OPTIONS.push({ id: `${v}|${p}|${g ? 1 : 0}`, vehicle: v, pricing: p, agg: g }))));
-  const optLabel = (o) => `${VEH[o.vehicle].short} · ${PRICING[o.pricing].name}${o.agg ? " · + aggregator" : ""}`;
+  const AGG = { 0: "no aggregator", A: "door delivery", B: "pickup at the stop", C: "shop restocking", AC: "door delivery + restocking", BC: "pickup + restocking" };
+  ["e14", "midi", "ice14"].forEach((v) => ["flat", "learn", "inclusive"].forEach((p) => Object.keys(AGG).forEach((g) => OPTIONS.push({ id: `${v}|${p}|${g}`, vehicle: v, pricing: p, agg: g }))));
+  const optLabel = (o) => `${VEH[o.vehicle].short} · ${PRICING[o.pricing].name}${o.agg && o.agg !== "0" ? " · " + AGG[o.agg] : ""}`;
+  const parseId = (id) => { const [vehicle, pricing, agg] = id.split("|"); return { vehicle, pricing, agg }; };
 
   /* Every option for one suburb, over several futures (draws). Returns compact stats. */
   function suburbGrid(s, params, reps, seed, onlyOpts) {
@@ -468,7 +563,7 @@
       out[id] = {
         npv: f((r) => r.npv / fx / 1e6), profit: f((r) => r.profitYr / fx / 1e6), pProfit: mean(runs.map((r) => (r.npv > 0 ? 1 : 0))),
         riders: f((r) => r.ridersDay), fleet: f((r) => r.fleet), fare: f((r) => r.avgFare), costRide: f((r) => r.costPerRide),
-        welfare: f((r) => r.welfareHHm + r.aggHHm), spend: f((r) => r.spendHHm), agg: f((r) => r.aggHHm),
+        welfare: f((r) => r.welfareHHm + r.aggHHm), famAll: f((r) => r.welfareHHm + r.aggHHm + r.shopFamHHm), shopFam: f((r) => r.shopFamHHm), spend: f((r) => r.spendHHm), agg: f((r) => r.aggHHm),
         jobsNet: f((r) => r.jobs.net), drivers: f((r) => r.jobs.drivers), tech: f((r) => r.jobs.tech), plant: f((r) => r.jobs.plant), couriers: f((r) => r.jobs.couriers), shopJobs: f((r) => r.jobs.shops), bodaLost: f((r) => -r.jobs.boda),
         exBoda: f((r) => r.exBodaDrivers + r.exBodaCouriers), bodaEarn: f((r) => r.bodaEarnChangeM), bodaPct: f((r) => r.bodaPct), bodaB0: f((r) => r.bodaB0),
         co2: f((r) => r.co2), fuelUsd: f((r) => r.fuelImportUsd / 1e6), city: f((r) => r.cityYr / fx / 1e6),
@@ -476,6 +571,10 @@
         useLow: f((r) => r.terc[0].useShare), useHigh: f((r) => r.terc[2].useShare), share: f((r) => r.share),
         peakLoad: f((r) => r.peakLoad), fares: runs[Math.floor(runs.length / 2)].fares,
         npvRuns: runs.map((r) => +(r.npv / fx / 1e6).toFixed(3)),
+        drops: f((r) => r.drops), rsOn: f((r) => r.rsOn), restockSave: f((r) => r.restockSaveM), restockVal: f((r) => r.restockValDay / 1e6), adopters: f((r) => r.adopters),
+        totes: f((r) => r.totes), cargoUse: f((r) => r.cargoUse), late: f((r) => r.lateShare), midX: f((r) => r.midX), cargoRev: f((r) => r.cargoRevYr / fx / 1e6), haulOp: f((r) => r.haulOp), haulMargin: f((r) => r.haulMargin / fx / 1e6), util: f((r) => r.utilisation),
+        bodaCourier: f((r) => r.bodaCourierM), diverted: f((r) => r.divertedM / fx / 1e6), pPlatform: mean(runs.map((r) => (r.platformYr > 0 ? 1 : 0))),
+        netCostRide: f((r) => r.costPerRide - r.cargoRevYr / Math.max(r.ridersDay * 310, 1)),
       };
     }
     return out;
@@ -486,7 +585,7 @@
     const AF = (1 - Math.pow(1.12, -10)) / 0.12; // 10 years at 12%: public subsidy and platform profit count against/with the operator's NPV
     const ids = Object.keys(st);
     const crit = {
-      families: (x) => x.welfare[1], jobs: (x) => x.jobsNet[1], money: (x) => x.npv[1] + AF * (x.platform[1] - x.city[1]), robust: (x) => x.npv[0] + AF * (x.platform[0] - x.city[2]), climate: (x) => x.co2[1],
+      families: (x) => (x.famAll || x.welfare)[1], jobs: (x) => x.jobsNet[1], money: (x) => x.npv[1] + AF * (x.platform[1] - x.city[1]), robust: (x) => x.npv[0] + AF * (x.platform[0] - x.city[2]), climate: (x) => x.co2[1],
     };
     const norm = {};
     for (const c in crit) { const v = ids.map((i) => crit[c](st[i])); const lo = Math.min(...v), hi = Math.max(...v); norm[c] = (i) => (hi - lo < 1e-9 ? 0.5 : (crit[c](st[i]) - lo) / (hi - lo)); }
@@ -526,5 +625,5 @@
     return { startWeek, runs, weeks, order };
   }
 
-  return { VEH, PRICING, OPTIONS, DEFAULTS, UNCERTAIN, simSuburb, suburbGrid, stats, score, network, optLabel, optionsFor, midiOk, merge, rng, quantile: q };
+  return { AGG, parseId, VEH, PRICING, OPTIONS, DEFAULTS, UNCERTAIN, simSuburb, suburbGrid, stats, score, network, optLabel, optionsFor, midiOk, merge, rng, quantile: q };
 });

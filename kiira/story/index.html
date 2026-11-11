@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kampala's Last Mile, Family by Family</title>
+<meta name="description" content="A scrolling story from the Kiira futures lab: 9,000 sample families, the boda riders who carry them and the shops they buy from, as electric shuttles arrive in 100 Kampala suburbs.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="author" content="Gava Charles">
+<style>
+:root{
+  --bg:#f6f6f3; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781; --rule:#e1e0d9;
+  --blue:#2a78d6; --orange:#eb6834; --aqua:#1baf7a; --violet:#6250d6; --amber:#eda100; --grey:#898781;
+  --f:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 var(--f)}
+a{color:var(--blue)}
+.top{position:sticky;top:0;z-index:20;background:rgba(246,246,243,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--rule)}
+.top .in{max-width:1320px;margin:0 auto;padding:9px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;font-size:13.5px}
+.top b{font-size:14.5px}
+.top a{color:var(--ink2);text-decoration:none}
+.top .bar{flex:1;min-width:120px;height:3px;background:var(--rule);border-radius:2px;overflow:hidden}
+.top .bar i{display:block;height:100%;width:0;background:var(--ink)}
+.title{max-width:1320px;margin:0 auto;padding:46px 16px 10px}
+.title h1{font-size:clamp(30px,4.4vw,52px);line-height:1.08;letter-spacing:-.02em;margin:0 0 14px;max-width:980px}
+.title p{color:var(--ink2);max-width:760px;margin:0 0 6px}
+.title .by{font-size:14px;color:var(--muted)}
+#story{max-width:1320px;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:36px}
+#steps{padding:30vh 0 50vh}
+.step{min-height:92vh;display:flex;align-items:center}
+.step .card{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.step h2{font-size:21px;line-height:1.25;margin:0 0 8px;letter-spacing:-.01em}
+.step p{margin:0 0 10px}
+.step p:last-child{margin-bottom:0}
+.step .k{font-weight:700;font-variant-numeric:tabular-nums}
+.sw{display:inline-block;width:11px;height:11px;border-radius:50%;margin:0 3px 0 1px;vertical-align:-1px}
+#fig{position:sticky;top:44px;height:calc(100vh - 44px);display:flex;flex-direction:column;justify-content:center}
+#stage{position:relative;width:100%;height:min(80vh,760px)}
+#stage canvas{position:absolute;inset:0;width:100%;height:100%}
+#over{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+#over text{font:13px var(--f);fill:var(--ink2)}
+#over .h{font-weight:700;fill:var(--ink);font-size:14px}
+#over .big{font-weight:700;fill:var(--ink);font-size:22px}
+#cap{font-size:13px;color:var(--ink2);min-height:40px;margin-top:6px}
+.end{max-width:760px;margin:0 auto;padding:30px 16px 80px;text-align:center}
+.end a.btn{display:inline-block;margin:10px 6px;padding:10px 18px;border-radius:8px;background:var(--ink);color:#fff;text-decoration:none;font-weight:600}
+.end a.btn.alt{background:var(--surface);color:var(--ink);border:1px solid var(--rule)}
+.note{font-size:12.5px;color:var(--muted)}
+@media (max-width:860px){
+  #story{grid-template-columns:1fr;gap:0}
+  #fig{order:-1;top:40px;height:58vh;z-index:5;background:var(--bg)}
+  #stage{height:52vh}
+  #steps{padding:10vh 0 40vh;position:relative;z-index:6}
+  .step{min-height:80vh;align-items:flex-end}
+  .step .card{background:rgba(252,252,251,.96)}
+  body{font-size:16px}
+}
+</style>
+</head>
+<body>
+<div class="top"><div class="in"><b>Kiira EV Last Mile</b><a href="../futures/">Futures lab</a><a href="../">Main Kiira page</a><span class="bar"><i id="prog"></i></span><span class="note">Gava Charles</span></div></div>
+<header class="title">
+  <h1>Kampala's last mile, family by family</h1>
+  <p>Each dot below is a real household type from the Kiira futures lab, an agent-based model of 100 suburbs in Greater Kampala. Scroll to watch what happens to them, and to the boda riders and shops around them, when electric shuttles start running to the main road.</p>
+  <p class="by">By Gava Charles · November 2026 · planning estimates from open data and stated assumptions</p>
+</header>
+<div id="story">
+  <div id="steps"></div>
+  <div id="fig"><div id="stage"><canvas id="cv"></canvas><svg id="over"></svg></div><div id="cap"></div></div>
+</div>
+<div class="end">
+  <h2>Explore every suburb yourself</h2>
+  <p>Change what matters most, the price of diesel, demand or the aggregator's fees, and re-run all the agents in your browser.</p>
+  <a class="btn" href="../futures/">Open the futures lab</a><a class="btn alt" href="../">The network model</a>
+  <p class="note" style="margin-top:22px">Households: 90 sample families per suburb, each standing for a few hundred real ones; one boda dot = 10 riders; one shop dot = 20 small shops. Best options use the lab's default weights and the median of 12 futures. Map: OpenStreetMap, WorldPop, Meta RWI. Model and story by Gava Charles.</p>
+</div>
+
+<script src="../data.js"></script>
+<script src="story_data.js"></script>
+<script>
+"use strict";
+const K = window.KIIRA, ST = window.STORY;
+const $ = (id) => document.getElementById(id);
+const nf = (v, d = 0) => (v == null || !isFinite(v) ? "–" : v.toLocaleString("en-GB", { maximumFractionDigits: d, minimumFractionDigits: d }));
+const SUB = Object.fromEntries(ST.subs.map((s) => [s.sid, s]));
+const C = { blue: [42, 120, 214], orange: [235, 104, 52], aqua: [27, 175, 122], violet: [98, 80, 214], amber: [237, 161, 0], grey: [160, 159, 152], ink: [11, 11, 11], light: [205, 204, 196] };
+const MODE = [["Walk", C.grey], ["Boda", C.orange], ["Feeder shuttle", C.blue], ["Trips elsewhere", C.light]];
+const INC = [[253, 227, 214], [243, 155, 115], [194, 74, 28], [122, 42, 12]]; // light to dark: income
+const FAMC = { "e14|flat": C.blue, "e14|learn": C.aqua, "e14|inclusive": C.orange, midi: C.violet, ice14: C.grey };
+const famKey = (id) => { const [v, p] = id.split("|"); return v === "e14" ? v + "|" + p : v; };
+
+/* ---------- dots ---------- */
+// Seeded random numbers so every reader sees the same picture.
+function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const R = rng(42);
+const polys = {}; K.geo.suburbs.features.forEach((f) => (polys[f.properties.sid] = f.geometry));
+function inPoly(x, y, g) {
+  const rings = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
+  for (const poly of rings) { let ins = false; const r = poly[0]; for (let i = 0, j = r.length - 1; i < r.length; j = i++) { const [xi, yi] = r[i], [xj, yj] = r[j]; if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) ins = !ins; } if (ins) return true; }
+  return false;
+}
+function bbox(g) { let a = [1e9, 1e9, -1e9, -1e9]; const rings = g.type === "Polygon" ? [g.coordinates] : g.coordinates; rings.forEach((p) => p[0].forEach(([x, y]) => { a = [Math.min(a[0], x), Math.min(a[1], y), Math.max(a[2], x), Math.max(a[3], y)]; })); return a; }
+const BB = {}; for (const k in polys) BB[k] = bbox(polys[k]);
+function randIn(sid) { const g = polys[sid], b = BB[sid]; for (let t = 0; t < 60; t++) { const x = b[0] + R() * (b[2] - b[0]), y = b[1] + R() * (b[3] - b[1]); if (inPoly(x, y, g)) return [x, y]; } return [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2]; }
+
+const D = []; // every dot: {kind, sid, lon, lat, ...}
+ST.agents.forEach((a) => { const [sid, inc, far, base, fin, gain, ord] = a; const [lon, lat] = randIn(sid); D.push({ kind: "h", sid, inc, far, base, fin, gain, ord, lon, lat }); });
+const incSorted = D.map((d) => d.inc).sort((a, b) => a - b), t1 = incSorted[Math.floor(incSorted.length / 3)], t2 = incSorted[Math.floor((2 * incSorted.length) / 3)];
+D.forEach((d) => (d.third = d.inc < t1 ? 0 : d.inc < t2 ? 1 : 2));
+ST.subs.forEach((s) => {
+  // boda riders, 1 dot = 10, two years on with door delivery: riding only, riding plus courier drops, now shuttle drivers, left the trade
+  const n0 = Math.round(s.B0 / 10), drv = Math.round(s.drv / 10), cour = Math.round(s.cour / 10), left = Math.round(s.left / 10);
+  for (let i = 0; i < n0; i++) { const [lon, lat] = randIn(s.sid); D.push({ kind: "b", sid: s.sid, lon, lat, fate: i < cour ? 1 : i < cour + drv ? 2 : i < cour + drv + left ? 3 : 0 }); }
+  const ns = Math.round(s.shops / 20), rs = Math.round(s.rsOn / 20);
+  for (let i = 0; i < ns; i++) { const [lon, lat] = randIn(s.sid); D.push({ kind: "s", sid: s.sid, lon, lat, rs: i < rs ? 1 : 0 }); }
+});
+const N = D.length;
+
+/* ---------- geometry ---------- */
+const cv = $("cv"), ctx = cv.getContext("2d"), over = $("over");
+let W = 0, H = 0, DPR = 1;
+let geo = null;
+function fitMap() {
+  let b = [1e9, 1e9, -1e9, -1e9]; Object.values(BB).forEach((x) => { b = [Math.min(b[0], x[0]), Math.min(b[1], x[1]), Math.max(b[2], x[2]), Math.max(b[3], x[3])]; });
+  const k = Math.cos((((b[1] + b[3]) / 2) * Math.PI) / 180), pad = 18;
+  const sx = (W - 2 * pad) / ((b[2] - b[0]) * k), sy = (H - 2 * pad) / (b[3] - b[1]), s = Math.min(sx, sy);
+  const ox = (W - (b[2] - b[0]) * k * s) / 2, oy = (H - (b[3] - b[1]) * s) / 2;
+  geo = { p: (lon, lat) => [ox + (lon - b[0]) * k * s, oy + (b[3] - lat) * s], s };
+}
+
+/* ---------- layouts: one target (x, y, r, colour, alpha) per dot for each beat ---------- */
+const hide = (d) => ({ x: d._mx, y: d._my, r: 1.2, c: C.light, a: 0 });
+function onMap(d, c, a = 0.9, r = 1.9) { return { x: d._mx, y: d._my, r, c, a }; }
+// Unit grid: dots in columns (one per group), stacked bottom-up in rows of `per`.
+function grids(groups, labels, opts = {}) {
+  const n = labels.length, top = opts.top || 70, bottom = H - (opts.bottom || 40), gw = (W - 40) / n, step = opts.step || Math.max(3.2, Math.min(6, Math.sqrt(((gw - 20) * (bottom - top)) / Math.max(...groups.map((g) => g.length || 1))) * 0.98));
+  const per = Math.max(1, Math.floor((gw - 20) / step)), pos = new Map();
+  groups.forEach((g, j) => g.forEach((d, i) => pos.set(d, [20 + j * gw + 10 + (i % per) * step + step / 2, bottom - Math.floor(i / per) * step])));
+  return { pos, step, gw, per, top, bottom };
+}
+const GAIN = (() => { const g = D.filter((d) => d.kind === "h" && d.fin !== 3).map((d) => d.gain).sort((a, b) => a - b); return { lo: g[Math.floor(g.length * 0.01)], hi: g[Math.floor(g.length * 0.99)], med: g[Math.floor(g.length / 2)] }; })();
+
+const BEATS = [];
+function beat(id, html, layout, overlay) { BEATS.push({ id, html, layout, overlay: overlay || (() => "") }); }
+const H_ = D.filter((d) => d.kind === "h"), B_ = D.filter((d) => d.kind === "b"), S_ = D.filter((d) => d.kind === "s");
+const T = ST.totals;
+const share = (arr, f) => arr.filter(f).length / Math.max(1, arr.length);
+
+beat("families", `<h2>9,000 families in 100 suburbs</h2><p>Each dot is a household in the model, placed in its suburb: from the inner city out to Mukono, Wakiso and the road to Entebbe. Together they stand for <span class="k">${nf(T.pop / 1e6, 1)} million people</span>.</p><p>Darker dots are better-off families, from Meta's wealth index.</p>`,
+  (d) => (d.kind === "h" ? onMap(d, INC[d.third + (d.inc > incSorted[Math.floor(incSorted.length * 0.9)] ? 1 : 0)]) : hide(d)),
+  () => legendRow([["Poorer", INC[0]], ["Middle", INC[1]], ["Better-off", INC[2]]]));
+beat("far", `<h2>Many live a long walk from the road</h2><p>The dark dots are families more than 500 m from any taxi or bus route: <span class="k">${Math.round(share(H_, (d) => d.far) * 100)}%</span> of them. For them a trip to work starts with a long walk or a boda fare of UGX 2,000 or more.</p>`,
+  (d) => (d.kind === "h" ? onMap(d, d.far ? C.ink : C.light, d.far ? 0.95 : 0.6) : hide(d)),
+  () => legendRow([["Over 500 m from the road", C.ink], ["Closer", C.light]]));
+let gToday, gNow, gInc;
+beat("today", `<h2>How they reach the road today</h2><p>The model's families choose each week between walking and a boda for trips towards the main road. Today, <span class="k">${Math.round(share(H_.filter((d) => d.base !== 3), (d) => d.base === 1) * 100)}%</span> of those trips go by boda. The rest walk.</p><p>Grey on the right: families whose main trip goes another way.</p>`,
+  (d) => { if (d.kind !== "h") return hide(d); const p = gToday.pos.get(d); return { x: p[0], y: p[1], r: gToday.step * 0.4, c: MODE[d.base][1], a: 0.92 }; },
+  () => colLabels(gToday, ["Walk", "Boda", "Trips elsewhere"], [0, 1, 3].map((m) => H_.filter((d) => d.base === m).length)));
+beat("shuttle", `<h2>Then the shuttles arrive</h2><p>Two years after the 14-seat electric feeders start, after word of mouth, crowding and fare changes have played out, <span class="k">${Math.round(share(H_.filter((d) => d.fin !== 3), (d) => d.fin === 2) * 100)}%</span> of those trips go by feeder (blue). Some families walked before and now ride. Others switch from bodas.</p>`,
+  (d) => { if (d.kind !== "h") return hide(d); const p = gNow.pos.get(d); return { x: p[0], y: p[1], r: gNow.step * 0.4, c: MODE[d.fin][1], a: 0.92 }; },
+  () => colLabels(gNow, ["Walk", "Boda", "Feeder shuttle", "Trips elsewhere"], [0, 1, 2, 3].map((m) => H_.filter((d) => d.fin === m).length)));
+beat("income", `<h2>Poorer families ride as much as richer ones</h2><p>Split by income, the share riding the feeder barely changes: <span class="k">${Math.round(ST.use[0] * 100)}%</span> of the poorest third's trips towards the road and <span class="k">${Math.round(ST.use[2] * 100)}%</span> of the richest third's. The fare is set below a boda fare, and poorer suburbs tend to be farther from the road.</p>`,
+  (d) => { if (d.kind !== "h") return hide(d); const p = gInc.pos.get(d); return { x: p[0], y: p[1], r: gInc.step * 0.4, c: MODE[d.fin][1], a: d.fin === 3 ? 0.25 : 0.92 }; },
+  () => colLabels(gInc, ["Poorest third", "Middle third", "Richest third"], [0, 1, 2].map((t) => Math.round(100 * share(H_.filter((d) => d.third === t && d.fin !== 3), (d) => d.fin === 2)) + "% by feeder"), true));
+beat("gain", `<h2>What each family gains</h2><p>Shorter walks, less waiting and cheaper trips than a boda add up. Counting time and money, the middle family gains about <span class="k">UGX ${nf(Math.round(GAIN.med / 1000) * 1000)}</span> a month. Families far from the road gain the most (dark).</p>`,
+  (d) => { if (d.kind !== "h") return hide(d); if (d.fin === 3 || d.gain > GAIN.hi || d.gain < GAIN.lo) return { x: d._sx, y: H - 30, r: 1.2, c: C.light, a: 0 }; return { x: d._gx, y: d._gy, r: 2.1, c: d.far ? C.ink : C.blue, a: 0.8 }; },
+  () => gainAxis());
+beat("bodas", `<h2>Boda riders lose trips</h2><p>Each orange dot is 10 boda riders who serve these suburbs: <span class="k">${nf(T.B0)}</span> in all. When families switch to the feeder, a rider's earnings fall by about <span class="k">${Math.abs(Math.round(T.bodaPct * 100))}%</span>.</p><p>Few riders leave the trade, because most still earn more than they could elsewhere. Those who leave go first into shuttle-driving and courier jobs.</p>`,
+  (d) => { if (d.kind === "h") return { x: d._mx, y: d._my, r: 1.4, c: C.light, a: 0.35 }; if (d.kind !== "b") return hide(d); return onMap(d, C.orange, 0.9, 2.1); },
+  () => legendRow([["10 boda riders", C.orange], ["Households", C.light]]));
+let gBoda;
+beat("couriers", `<h2>Door delivery turns them into couriers</h2><p>If the feeders also carry shopping, someone has to take it the last few hundred metres. With <b>door delivery</b>, boda riders do it, and in the model that wins back about <span class="k">${Math.round(ST.bodaRecovery * 100)}%</span> of their lost earnings.</p><p>Here every rider is grouped by what they do two years on. Many keep riding and add courier drops between fares.</p>`,
+  (d) => { if (d.kind !== "b") return d.kind === "h" ? { x: d._mx, y: d._my, r: 1.2, c: C.light, a: 0 } : hide(d); const p = gBoda.pos.get(d); return { x: p[0], y: p[1], r: gBoda.step * 0.42, c: [C.orange, C.aqua, C.blue, C.grey][d.fate], a: 0.95 }; },
+  () => colLabels(gBoda, ["Riding only", "Riding + courier drops", "Now shuttle drivers", "Left the trade"], [0, 1, 2, 3].map((f) => nf(B_.filter((d) => d.fate === f).length * 10) + " riders"), true));
+beat("shops", `<h2>Shops restock without closing</h2><p>Each green or grey dot is 20 small shops. Today a shopkeeper shuts for half a day to fetch stock from Kikuubo or a wholesale cluster. With <b>restocking</b>, totes come out on idle midday shuttles and ride the feeder to the shop's stop.</p><p>In the model <span class="k">${nf(T.rsOn)}</span> shops take it up (green), saving about <span class="k">UGX ${nf(Math.round(T.restockSave / 1000) * 1000)}</span> a month each.</p>`,
+  (d) => { if (d.kind === "h") return { x: d._mx, y: d._my, r: 1.2, c: C.light, a: 0.25 }; if (d.kind !== "s") return hide(d); return onMap(d, d.rs ? C.aqua : C.grey, d.rs ? 0.95 : 0.55, d.rs ? 2.2 : 1.6); },
+  () => corridors() + legendRow([["20 shops restocking", C.aqua], ["20 shops not yet", C.grey], ["Wholesale corridor", C.aqua]]));
+beat("ev", `<h2>Why electric</h2><p>Same families, fares and futures, with only the vehicle changed. Each cluster is one suburb, placed by how much more a Kiira e-shuttle earns over 10 years than a diesel taxi. Every suburb sits to the right of zero.</p><p>Power at UGX ~450/kWh off-peak against diesel at ~5,000/L does most of the work. Idle e-shuttles can also take the wholesale haul in <span class="k">${ST.haulE}</span> suburbs, diesel taxis in <span class="k">${ST.haulD}</span>.</p>`,
+  (d) => { if (d.kind !== "h") return hide(d); return { x: d._ex, y: d._ey, r: 1.7, c: C.aqua, a: 0.85 }; },
+  () => evAxis());
+beat("best", `<h2>The best option, suburb by suburb</h2><p>Weighing families' gain, jobs, money, robustness in bad futures and climate, the model picks a best option for each suburb. Electric 14-seaters win everywhere. The fare rule differs: <span class="sw" style="background:rgb(${C.orange})"></span>inclusive fares where families gain most, <span class="sw" style="background:rgb(${C.blue})"></span>a flat UGX 1,000 elsewhere. Most best options pair the feeder with <b>${ST.topAgg}</b>.</p><p>Change the weights and every suburb re-ranks in the futures lab.</p>`,
+  (d) => (d.kind === "h" ? onMap(d, FAMC[famKey(SUB[d.sid].best)], 0.9) : hide(d)),
+  () => legendRow(Object.entries(ST.bestCounts).map(([k, n]) => [`${ST.famLabel[k]} (${n})`, FAMC[k]])));
+
+/* ---------- overlays ---------- */
+function legendRow(items) { let x = 10; return items.map(([t, c]) => { const s = `<circle cx="${x + 5}" cy="16" r="5" fill="rgb(${c})"/><text x="${x + 14}" y="20">${t}</text>`; x += 26 + t.length * 7.2; return s; }).join(""); }
+function colLabels(g, labels, counts, isText) { return labels.map((l, j) => `<text class="h" x="${20 + j * g.gw + 10}" y="${g.top - 34}">${l}</text><text x="${20 + j * g.gw + 10}" y="${g.top - 16}">${isText ? counts[j] : nf(counts[j]) + " families"}</text>`).join(""); }
+function gainAxis() { const x = (v) => 40 + ((v - GAIN.lo) / (GAIN.hi - GAIN.lo)) * (W - 80), y = H - 40; let s = `<line x1="40" x2="${W - 40}" y1="${y}" y2="${y}" stroke="#c3c2b7"/>`; for (const v of [0, 25000, 50000, 75000, 100000]) if (v >= GAIN.lo && v <= GAIN.hi) s += `<text x="${x(v)}" y="${y + 18}" text-anchor="middle">${v / 1000}k</text>`; s += `<line x1="${x(GAIN.med)}" x2="${x(GAIN.med)}" y1="60" y2="${y}" stroke="#0b0b0b" stroke-dasharray="3 3"/><text class="h" x="${x(GAIN.med) + 6}" y="74">median UGX ${nf(Math.round(GAIN.med / 1000))}k a month</text><text x="${W - 40}" y="${y + 34}" text-anchor="end">gain per household, UGX a month (money and time)</text>`; return s + legendRow([["Over 500 m from the road", C.ink], ["Closer", C.blue]]); }
+let EVX = null;
+function evAxis() { const { x, lo, hi } = EVX, y = H - 40; let s = `<line x1="40" x2="${W - 30}" y1="${y}" y2="${y}" stroke="#c3c2b7"/><line x1="${x(0)}" x2="${x(0)}" y1="50" y2="${y}" stroke="#0b0b0b" stroke-dasharray="3 3"/><text x="${x(0) + 6}" y="62">diesel better ← | → electric better</text>`; for (let v = 0; v <= hi; v += hi > 1.5 ? 0.5 : 0.25) s += `<text x="${x(v)}" y="${y + 18}" text-anchor="middle">+$${v.toFixed(2)}m</text>`; s += `<text x="${W - 30}" y="${y + 34}" text-anchor="end">extra 10-year value of an e-shuttle over a diesel taxi, per suburb</text>`; [["Inner city", 0.3], ["Commuter belt", 0.52], ["Growth frontier", 0.74]].forEach(([l, f]) => (s += `<text class="h" x="${W - 30}" y="${H * f - 26}" text-anchor="end">${l}</text>`)); return s; }
+function corridors() { if (!geo) return ""; const w0 = geo.p(32.5745, 0.3128); let s = ""; const mx = Math.max(...Object.values(ST.hubFlow), 1e-9);
+  K.geo.trunks.features.forEach((f) => { const v = ST.hubFlow[f.properties.hub] || 0; if (v <= 0) return; const cs = f.geometry.type === "LineString" ? [f.geometry.coordinates] : f.geometry.coordinates;
+    cs.forEach((line) => { s += `<path d="${line.map(([lo, la], i) => (i ? "L" : "M") + geo.p(lo, la).map((z) => z.toFixed(1)).join(",")).join("")}" fill="none" stroke="rgb(${C.aqua})" stroke-opacity=".55" stroke-width="${(0.8 + 3.2 * Math.sqrt(v / mx)).toFixed(1)}" stroke-linecap="round"/>`; }); });
+  return s + `<circle cx="${w0[0]}" cy="${w0[1]}" r="7" fill="#0b0b0b" stroke="#fff" stroke-width="2"/><text class="h" x="${w0[0] + 10}" y="${w0[1] + 4}">Kikuubo and Owino</text>`; }
+
+/* ---------- layout pass ---------- */
+let LAY = []; // per beat: Float32Array x,y,r,a and Uint8 rgb
+function layout() {
+  const box = $("stage").getBoundingClientRect(); W = box.width; H = box.height; DPR = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = W * DPR; cv.height = H * DPR; over.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  fitMap();
+  D.forEach((d) => { [d._mx, d._my] = geo.p(d.lon, d.lat); });
+  const hh = H_;
+  gToday = grids([0, 1, 3].map((m) => hh.filter((d) => d.base === m)), [0, 1, 2]);
+  gNow = grids([0, 1, 2, 3].map((m) => hh.filter((d) => d.fin === m)), [0, 1, 2, 3]);
+  // income: three columns (thirds), each sorted feeder first so the blue block reads as a share
+  const ord = { 2: 0, 1: 1, 0: 2, 3: 3 };
+  gInc = grids([0, 1, 2].map((t) => hh.filter((d) => d.third === t).sort((a, b) => ord[a.fin] - ord[b.fin])), [0, 1, 2]);
+  gBoda = grids([0, 1, 2, 3].map((f) => B_.filter((d) => d.fate === f)), [0, 1, 2, 3], { step: Math.max(5, Math.min(9, W / 110)) });
+  // gain beeswarm (simple binned stacking)
+  const x = (v) => 40 + ((Math.max(GAIN.lo, Math.min(GAIN.hi, v)) - GAIN.lo) / (GAIN.hi - GAIN.lo)) * (W - 80), bins = {}, bw = 4.2;
+  hh.filter((d) => d.fin !== 3 && d.gain <= GAIN.hi && d.gain >= GAIN.lo).sort((a, b) => a.far - b.far).forEach((d) => { const bx = Math.round(x(d.gain) / bw); bins[bx] = (bins[bx] || 0) + 1; d._gx = bx * bw; d._gy = H - 46 - bins[bx] * 3.0; });
+  const maxStack = Math.max(...Object.values(bins)); if (maxStack * 3 > H - 120) { const k = (H - 120) / (maxStack * 3); hh.forEach((d) => { if (d._gy != null) d._gy = H - 46 - (H - 46 - d._gy) * k; }); }
+  hh.forEach((d) => (d._sx = x(0)));
+  // e-shuttle advantage: each suburb's households cluster at its x
+  const adv = ST.subs.map((s) => s.evAdv), lo = Math.min(0, ...adv), hi = Math.max(...adv) * 1.05;
+  const ex = (v) => 40 + ((v - lo) / (hi - lo)) * (W - 70); EVX = { x: ex, lo, hi };
+  const segY = { "Inner city": H * 0.3, "Commuter belt": H * 0.52, "Growth frontier": H * 0.74 };
+  const cnt = {};
+  hh.forEach((d) => { const s = SUB[d.sid]; const k = cnt[d.sid] = (cnt[d.sid] || 0) + 1; const ang = k * 2.39996, rad = 1.6 * Math.sqrt(k); d._ex = ex(s.evAdv) + Math.cos(ang) * rad; d._ey = (segY[s.segment] || H / 2) + Math.sin(ang) * rad; });
+  LAY = BEATS.map((b) => { const L = { x: new Float32Array(N), y: new Float32Array(N), r: new Float32Array(N), a: new Float32Array(N), c: new Uint8Array(N * 3) };
+    D.forEach((d, i) => { const t = b.layout(d); L.x[i] = t.x; L.y[i] = t.y; L.r[i] = t.r; L.a[i] = t.a; L.c[i * 3] = t.c[0]; L.c[i * 3 + 1] = t.c[1]; L.c[i * 3 + 2] = t.c[2]; }); return L; });
+  BEATS.forEach((b) => (b.svg = b.overlay()));
+  last = null; render();
+}
+
+/* ---------- scroll engine: the picture is a pure function of the scroll position ---------- */
+const steps = $("steps");
+BEATS.forEach((b, i) => { const d = document.createElement("section"); d.className = "step"; d.id = "b-" + b.id; d.innerHTML = `<div class="card">${b.html}</div>`; steps.appendChild(d); });
+const stepEls = [...steps.children];
+const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+let last = null;
+function state() {
+  const mid = window.innerHeight * 0.55;
+  const tops = stepEls.map((e) => e.getBoundingClientRect().top);
+  let i = 0; while (i + 1 < tops.length && tops[i + 1] <= mid) i++;
+  const span = i + 1 < tops.length ? tops[i + 1] - tops[i] : 1;
+  const p = Math.max(0, Math.min(1, (mid - tops[i]) / span));
+  // hold the picture for most of the beat, then move to the next one in the last 45% of the scroll
+  const t = i + 1 < tops.length ? ease(Math.max(0, Math.min(1, (p - 0.55) / 0.45))) : 0;
+  return { i, t };
+}
+function render() {
+  const s = state(); const key = s.i + ":" + s.t.toFixed(3); if (key === last) return; last = key;
+  const A = LAY[s.i], B = LAY[Math.min(s.i + 1, LAY.length - 1)], t = s.t;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
+  for (let k = 0; k < N; k++) {
+    const a = A.a[k] + (B.a[k] - A.a[k]) * t; if (a < 0.02) continue;
+    const x = A.x[k] + (B.x[k] - A.x[k]) * t, y = A.y[k] + (B.y[k] - A.y[k]) * t, r = A.r[k] + (B.r[k] - A.r[k]) * t;
+    const c0 = k * 3; ctx.fillStyle = `rgba(${Math.round(A.c[c0] + (B.c[c0] - A.c[c0]) * t)},${Math.round(A.c[c0 + 1] + (B.c[c0 + 1] - A.c[c0 + 1]) * t)},${Math.round(A.c[c0 + 2] + (B.c[c0 + 2] - A.c[c0 + 2]) * t)},${a.toFixed(3)})`;
+    ctx.beginPath(); ctx.arc(x, y, Math.max(0.6, r), 0, 6.2832); ctx.fill();
+  }
+  // overlay: cross-fade the two beats' labels
+  over.innerHTML = `<g opacity="${(1 - Math.min(1, t * 2)).toFixed(2)}">${BEATS[s.i].svg}</g>` + (t > 0.5 ? `<g opacity="${((t - 0.5) * 2).toFixed(2)}">${BEATS[Math.min(s.i + 1, BEATS.length - 1)].svg}</g>` : "");
+  const sc = window.scrollY / Math.max(1, document.documentElement.scrollHeight - window.innerHeight); $("prog").style.width = (sc * 100).toFixed(1) + "%";
+  $("cap").textContent = CAPS[Math.min(s.t > 0.5 ? s.i + 1 : s.i, CAPS.length - 1)];
+}
+const CAPS = ["Each dot is a sample household; colour shows income.", "Dark: more than 500 m from a taxi or bus route.", "Trips towards the main road, before the shuttles.", "The same trips two years after the shuttles start.", "Feeder share by family income.", "Gain per household per month.", "One dot = 10 boda riders.", "One dot = 10 boda riders, two years on.", "One dot = 20 small shops; lines carry stock from the wholesale district.", "Households grouped by suburb, placed by the e-shuttle's advantage.", "Households coloured by their suburb's best option."];
+let raf = 0; window.addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; render(); }); }, { passive: true });
+let rz = 0; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(layout, 150); });
+layout();
+if (location.hash.startsWith("#b-") && $(location.hash.slice(1))) { const e = $(location.hash.slice(1)); window.scrollTo(0, e.getBoundingClientRect().top + scrollY + e.offsetHeight * 0.35 - innerHeight * 0.55); render(); }
+window.storyReady = true;
+</script>
+</body>
+</html>

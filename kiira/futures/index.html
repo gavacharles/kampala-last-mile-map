@@ -108,7 +108,7 @@ footer{max-width:1280px;margin:0 auto;padding:18px 16px 40px;font-size:12.5px;co
 <div class="top"><div class="in">
   <div class="brand">Kiira EV Last Mile <small>Futures lab · agent-based model</small></div>
   <nav>
-    <a href="#how">Agents</a><a href="#map-s">Best three</a><a href="#families">Families</a><a href="#jobs">Jobs</a><a href="#routes">Routes</a><a href="#ev">Electric 14-seater</a><a href="#agg">Aggregator</a><a href="#rollout">Roll-out</a><a href="#gallery">Maps &amp; charts</a><a href="#method">Method</a><a href="../">← Main Kiira page</a>
+    <a href="#how">Agents</a><a href="#map-s">Best three</a><a href="#families">Families</a><a href="#jobs">Jobs</a><a href="#routes">Routes</a><a href="#ev">Electric 14-seater</a><a href="#agg">Aggregator</a><a href="#rollout">Roll-out</a><a href="#gallery">Maps &amp; charts</a><a href="#method">Method</a><a href="../story/"><b>Scrolling story</b></a><a href="../">← Main Kiira page</a>
   </nav>
 </div></div>
 <main>
@@ -117,6 +117,7 @@ footer{max-width:1280px;margin:0 auto;padding:18px 16px 40px;font-size:12.5px;co
   <p class="lede">This lab rebuilds the Kiira model as an agent-based model. Households pick how to travel each week, operators learn fares and fleet sizes, boda riders cut prices or leave, and shops decide whether to join a delivery aggregator. The model runs every option for all 100 suburbs over many uncertain futures, then ranks the best three options for each area by what you care about.</p>
   <div class="tiles" id="heroTiles"></div>
   <p class="note" id="heroNote"></p>
+  <p style="margin:10px 0 0">New: <a href="../story/">Kampala's last mile, family by family</a>, a scrolling story in which 9,000 sample families, the boda riders and the shops move as you read.</p>
 </section>
 
 <section id="how">
@@ -126,7 +127,7 @@ footer{max-width:1280px;margin:0 auto;padding:18px 16px 40px;font-size:12.5px;co
     <div class="agent"><span class="ico">Households</span><b>90 sample families per suburb</b>Income from Meta's wealth index, a distance to the nearest stop, their own value of time and their own trust in new things. Each week they choose walk, boda or feeder for a peak trip and an off-peak trip. They hear about the feeder from adverts and neighbours, remember crowding and being left at the stop, and tend to stick with what they used last week.</div>
     <div class="agent"><span class="ico">Operator</span><b>One per suburb</b>Launches with 85% of its planned fleet. Each month it nudges fares up or down in each time period and keeps changes that helped. It orders vehicles when buses are full or riders are refused (8-week delivery) and releases them when buses run empty.</div>
     <div class="agent"><span class="ico">Boda riders</span><b>A pool per suburb</b>Their daily earnings follow the trips left to them. When pay falls below what they could earn elsewhere, they cut fares and some leave. Leavers fill shuttle-driver and courier jobs first.</div>
-    <div class="agent"><span class="ico">Shops and buyers</span><b>Local delivery aggregator</b>Shops join when expected orders beat the commission. Households start ordering once enough nearby shops are listed. Feeders carry parcels in off-peak hours and couriers walk or e-bike the last few hundred metres.</div>
+    <div class="agent"><span class="ico">Shops and buyers</span><b>Delivery and restocking aggregator</b>Households order from nearby shops for door delivery or pickup at the stop. Small shops restock from the wholesale district instead of closing to fetch stock, and can buy on two-week credit. Shops join when the saving beats the fees, households when enough shops are listed. Late totes slow take-up. Feeders carry totes in quiet hours; boda riders do the last hop.</div>
     <div class="agent"><span class="ico">Kiira plant</span><b>Supplier</b>Electric fleets wait in a queue for plant output (40% of 2,500 a year at first). Diesel taxis are imported, so they can start at once.</div>
   </div>
 </section>
@@ -147,13 +148,14 @@ footer{max-width:1280px;margin:0 auto;padding:18px 16px 40px;font-size:12.5px;co
 
 <section id="map-s">
   <h2>Best three options for each suburb</h2>
-  <p class="sub">Hover over a suburb to see its best three options. Click it for the full picture and to watch its two years unfold. There are up to 18 options per suburb: three vehicles (Kiira 14-seat e-shuttle, Kayoola 8 m e-midi where roads allow, a diesel 14-seat taxi for comparison), three ways to set fares (flat UGX 1,000, learning dynamic, inclusive with a city transfer discount and a 20% green grant), each with or without the aggregator.</p>
+  <p class="sub">Hover over a suburb to see its best three options. Click it for the full picture and to watch its two years unfold. There are up to 54 options per suburb: three vehicles (Kiira 14-seat e-shuttle, Kayoola 8 m e-midi where roads allow, a diesel 14-seat taxi for comparison), three ways to set fares (flat UGX 1,000, learning dynamic, inclusive with a city transfer discount and a 20% green grant) and six aggregator settings (none, door delivery, pickup at the stop, shop restocking, or door or pickup combined with restocking).</p>
   <div class="mapbar">
     <label>Colour suburbs by <select id="layer">
-      <option value="best">Best option</option><option value="welfare">Gain per household (UGX/month)</option><option value="jobs">Net jobs</option><option value="npv">Operator NPV, best option (USD m)</option><option value="pev">Chance e-shuttle beats diesel</option><option value="boda">Boda rider earnings change</option><option value="riders">Riders per day</option>
+      <option value="best">Best option</option><option value="agg">Best aggregator setting</option><option value="plat">Chance the aggregator pays its way</option><option value="restock">Shops restocking through the aggregator</option><option value="welfare">Gain per household (UGX/month)</option><option value="jobs">Net jobs</option><option value="npv">Operator NPV, best option (USD m)</option><option value="pev">Chance e-shuttle beats diesel</option><option value="boda">Boda rider earnings change</option><option value="riders">Riders per day</option>
     </select></label>
     <label>Base <select id="base"><option value="grey">Grey canvas</option><option value="sat">Satellite</option></select></label>
     <label><input type="checkbox" id="showRoutes" checked> Feeder routes</label>
+    <label><input type="checkbox" id="showCorr"> Wholesale corridors</label>
   </div>
   <div class="mapwrap"><div id="map" class="map"></div><div id="panel"><h3>Pick a suburb</h3><p class="note">Hover for the best three; click for detail, the week-by-week film and every option with its spread across futures.</p><div id="mixBox"></div></div></div>
 </section>
@@ -189,24 +191,32 @@ footer{max-width:1280px;margin:0 auto;padding:18px 16px 40px;font-size:12.5px;co
   <p class="sub">The same families, the same fares and the same futures, with only the vehicle changed. The e-shuttle costs more to buy but far less to run: power at UGX ~450/kWh on the off-peak tariff against diesel at about UGX 5,000/L. Every future draws diesel prices, Kiira prices and electricity prices from wide ranges.</p>
   <div class="tiles" id="evTiles"></div>
   <div class="grid2">
-    <div class="card"><h3 style="margin-top:0">E-shuttle NPV minus diesel taxi NPV, every suburb and future</h3><svg class="chart" id="evHist" viewBox="0 0 560 260"></svg><p class="note">Learning-dynamic fares, with the aggregator. Bars to the right of zero are futures where the e-shuttle earns more over 10 years.</p></div>
+    <div class="card"><h3 style="margin-top:0">E-shuttle NPV minus diesel taxi NPV, every suburb and future</h3><svg class="chart" id="evHist" viewBox="0 0 560 260"></svg><p class="note">Learning-dynamic fares, with pickup and restocking. Bars to the right of zero are futures where the e-shuttle earns more over 10 years.</p></div>
     <div class="card"><h3 style="margin-top:0">Cost per ride by vehicle</h3><div class="keyrow" id="cprKey"></div><svg class="chart" id="cprChart" viewBox="0 0 560 260"></svg><p class="note">Running costs plus annualised vehicles and chargers, per ride. Median across suburbs; the band spans the 10th to 90th percentile of futures.</p></div>
   </div>
 </section>
 
 <section id="agg">
-  <h2>A local delivery aggregator</h2>
-  <p class="sub">Nearby shops list their goods on one app. Orders go into totes that ride the feeder in quiet hours, and couriers on foot or e-bike carry them the last few hundred metres. Families save a shopping trip, shops gain sales, couriers gain work, and the operator fills empty seats.</p>
-  <svg class="chart" id="aggFlow" viewBox="0 0 1000 120" style="max-width:1000px"></svg>
-  <div class="tiles" id="aggTiles" style="margin-top:12px"></div>
-  <p class="note">The aggregator raises welfare and jobs in almost every suburb, so it is in nearly every best option. With a low commission or few orders, the platform's own fixed costs can exceed its fees in small suburbs (try the commission slider and re-run). Some sales move from other shops, so shop jobs are counted net of that.</p>
+  <h2>The aggregator: delivery, pickup and shop restocking</h2>
+  <p class="sub">The same shuttles can carry goods in their quiet hours. The model tests six settings in every suburb and every future. Households can order from nearby shops for <b>door delivery</b> (a boda rider does the last hop) or <b>pickup at the stop</b> (a locker or kiosk). Small shops can <b>restock</b> from the wholesale district. Totes ride to the hub and then on the feeder, so the shopkeeper no longer closes for half a day to fetch stock, and can buy on two-week credit. Shop locations come from OpenStreetMap: only about a third of mapped shops are within 300 m of their feeder route, so most restock drops need a boda for the last hop.</p>
+  <svg class="chart" id="aggFlow" viewBox="0 0 1000 150" style="max-width:1000px"></svg>
+  <h3>Six settings compared <span class="note">(e-shuttle, learning fares; all 100 suburbs, median future)</span></h3>
+  <div class="tablewrap" style="max-height:none"><table id="aggTable"></table></div>
+  <p class="note">Platform profit counts fees, commissions and credit interest, less tote fees to the operator, boda couriers, mobile-money charges, haulage, winning and keeping customers, tech and staff, lockers, the cost of credit and defaults. "Sales moved" are orders that would otherwise have gone to another shop or market, so they are not new income for Kampala.</p>
+  <div class="grid2" style="margin-top:14px">
+    <div class="card"><h3 style="margin-top:0">Boda riders: door delivery wins back much of their loss</h3><svg class="chart" id="bodaAgg" viewBox="0 0 560 250"></svg><p class="note">Change in a boda rider's net earnings once the feeder runs, by aggregator setting. Courier drops are shared across the boda pool.</p></div>
+    <div class="card"><h3 style="margin-top:0">Does the platform pay its way?</h3><svg class="chart" id="platAgg" viewBox="0 0 560 250"></svg><p class="note">Platform profit a year across all 100 suburbs: median, with the 10th to 90th percentile of futures. Restocking alone rarely covers its fixed costs. Sharing them with pickup does.</p></div>
+  </div>
+  <h3>Idle e-shuttles as cargo vans</h3>
+  <p class="sub" style="margin-bottom:8px">About 30% of the feeder fleet is parked at midday. With seats folded, a 14-seater carries about 20 totes from the wholesale district to the hub. The operator takes the job when it costs less than hiring a van, counting the private hire those hours would otherwise earn. Electric running costs make the difference.</p>
+  <div class="tiles" id="haulTiles"></div>
 </section>
 
 <section id="rollout">
   <h2>Roll-out, week by week</h2>
   <p class="sub">All 100 suburbs together, with electric fleets queued for Kiira's output. Press play to watch riders grow as word spreads, operators add vehicles and the aggregator catches on.</p>
   <div class="mapbar">
-    <label>Network <select id="netSel"><option value="best">Best option in each suburb</option><option value="e14">All e-shuttles (learning fares + aggregator)</option><option value="ice14">All diesel taxis (learning fares + aggregator)</option></select></label>
+    <label>Network <select id="netSel"><option value="best">Best option in each suburb</option><option value="e14">All e-shuttles (learning fares, pickup + restocking)</option><option value="ice14">All diesel taxis (learning fares, pickup + restocking)</option></select></label>
     <button id="play">▶ Play</button>
     <input type="range" id="wk" min="0" max="100" value="100" style="flex:1;min-width:200px;accent-color:var(--blue)">
     <output id="wkO" style="font-weight:700;min-width:120px"></output>
@@ -226,6 +236,8 @@ footer{max-width:1280px;margin:0 auto;padding:18px 16px 40px;font-size:12.5px;co
     <a href="img/F4_boda_earnings.jpg"><img src="img/F4_boda_earnings.jpg" alt="Map of boda rider earnings change" loading="lazy"></a>
     <a href="img/F5_ev_vs_diesel.jpg"><img src="img/F5_ev_vs_diesel.jpg" alt="Map of e-shuttle NPV advantage over diesel" loading="lazy"></a>
     <a href="img/F6_aggregator_orders.jpg"><img src="img/F6_aggregator_orders.jpg" alt="Map of aggregator orders per day" loading="lazy"></a>
+    <a href="img/F7_restocking_corridors.jpg"><img src="img/F7_restocking_corridors.jpg" alt="Map of shops restocking and wholesale corridors" loading="lazy"></a>
+    <a href="img/F8_aggregator_pays.jpg"><img src="img/F8_aggregator_pays.jpg" alt="Map of the chance the aggregator pays its way" loading="lazy"></a>
   </div>
   <h3>Charts</h3>
   <div class="galw">
@@ -235,6 +247,8 @@ footer{max-width:1280px;margin:0 auto;padding:18px 16px 40px;font-size:12.5px;co
     <a href="img/D4_families.jpg"><img src="img/D4_families.jpg" alt="Who rides and what families gain" loading="lazy"></a>
     <a href="img/D5_rollout.jpg"><img src="img/D5_rollout.jpg" alt="Roll-out over time" loading="lazy"></a>
     <a href="img/D6_uncertainty_and_weights.jpg"><img src="img/D6_uncertainty_and_weights.jpg" alt="Uncertainty margins and the effect of weights" loading="lazy"></a>
+    <a href="img/D7_aggregator_settings.jpg"><img src="img/D7_aggregator_settings.jpg" alt="Six aggregator settings compared" loading="lazy"></a>
+    <a href="img/D8_idle_shuttles_cargo.jpg"><img src="img/D8_idle_shuttles_cargo.jpg" alt="Idle shuttles as cargo vans, electric vs diesel" loading="lazy"></a>
   </div>
   <h3>How to use this lab</h3>
   <video src="img/A10_how_to_futures_lab.mp4" controls playsinline preload="metadata" style="width:100%;max-width:960px;border-radius:8px;border:1px solid var(--rule);background:#000"></video>
@@ -247,7 +261,8 @@ footer{max-width:1280px;margin:0 auto;padding:18px 16px 40px;font-size:12.5px;co
       <p>Each of the 100 suburbs is simulated for 104 weeks with 90 sample households. Each household stands for a few hundred real ones. Trips, costs, walking, waiting, boda fares and the logit choice use the same formulas and inputs as the network model on the main page. With the same fare and fleet, the two models agree on daily riders to within about 5%.</p>
       <p><b>What the agents add.</b> Awareness spreads by Bass diffusion (adverts plus word of mouth). Habit is a bonus in shillings for last week's mode. Refusals at full buses add remembered waiting time. Operators learn fares by trial and error each month and adjust fleets with a delivery lag. Boda riders' pay responds to lost trips, leading to price cuts and exits. Shop and household adoption of the aggregator feed each other, and plant output is shared across suburbs.</p>
       <p><b>Uncertainty.</b> Each future draws all twelve uncertain inputs (table) at once. Every option in a suburb faces the same futures and the same families, so differences between options come from the policy, not from luck. Results show the median and the 10th to 90th percentile.</p>
-      <p><b>Scoring.</b> For each suburb, every option's median family gain, net jobs, money (operator NPV plus platform profit minus city subsidy over 10 years), robustness (the same at the 10th percentile) and CO₂ saved are scaled from 0 to 1 against the other options there. The weighted average ranks them.</p>
+      <p><b>Aggregator.</b> Six settings per suburb: none, door delivery, pickup at the stop, shop restocking, and door or pickup combined with restocking. Households adopt ordering by word of mouth once enough shops are listed (pickup suits people who already ride). Shops restock this way when the saving (the boda trip and the hours closed, plus margin on stock bought on two-week credit) beats the fees. Totes ride in a rack and in empty seats in quiet hours; late totes slow take-up. Boda riders do the last hop, and that pay counts in their earnings. Idle midday shuttles take the wholesale haul when it beats hiring a van. Shop locations relative to each route come from OpenStreetMap.</p>
+      <p><b>Scoring.</b> For each suburb, every option's median family gain (including shopkeepers' savings), net jobs, money (operator NPV plus platform profit minus city subsidy over 10 years), robustness (the same at the 10th percentile) and CO₂ saved are scaled from 0 to 1 against the other options there. The weighted average ranks them.</p>
       <p><b>Limits.</b> All inputs are planning assumptions. Replace them with household surveys, operator data and Kiira Motors costs. The 14-seat e-shuttle is a product concept, not a current Kiira model. Trunk buses, taxis' own response and land use are not agents here.</p>
       <p class="note">Model code: <a href="kiira_abm.js">kiira_abm.js</a> (runs in Node and in this page) · Data: <a href="futures_data.js">futures_data.js</a> · Built by Gava Charles.</p>
     </div>
@@ -267,6 +282,9 @@ footer{max-width:1280px;margin:0 auto;padding:18px 16px 40px;font-size:12.5px;co
 "use strict";
 const K = window.KIIRA, AB = window.ABM, A = window.KiiraABM;
 const SUBS = K.inputs.slice().sort((a, b) => a.sid - b.sid);
+// share of mapped shops within 300 m of each feeder route (OSM), used by the aggregator agents
+const SHOPS = Object.fromEntries((window.ABM.shops || []).map((x) => [x.sid, x]));
+SUBS.forEach((s) => (s.near300 = SHOPS[s.sid] ? SHOPS[s.sid].near300 : 0.33));
 const BY = Object.fromEntries(SUBS.map((s) => [s.sid, s]));
 const FX = A.DEFAULTS.fx;
 let GRID = AB.grid, NETS = AB.nets, params = {};
@@ -289,8 +307,10 @@ const FAM = [
   { key: "midi", label: "E-midi 8 m (any fare rule)", c: "#6250d6" },
   { key: "ice14", label: "Diesel taxi 14 (any fare rule)", c: "#898781" },
 ];
+const AGGC = [["0", "No aggregator", "#898781"], ["A", "Door delivery", "#eb6834"], ["B", "Pickup at the stop", "#2a78d6"], ["C", "Shop restocking", "#1baf7a"], ["AC", "Door + restocking", "#6250d6"], ["BC", "Pickup + restocking", "#eda100"]];
+const aggOf = (id) => AGGC.find((a) => a[0] === id.split("|")[2]);
 const famOf = (id) => { const [v, p] = id.split("|"); return FAM.find((f) => f.key === (v === "e14" ? v + "|" + p : v)); };
-const label = (id) => { const [v, p, g] = id.split("|"); return A.optLabel({ vehicle: v, pricing: p, agg: g === "1" }); };
+const label = (id) => A.optLabel(A.parseId(id));
 const ranked = (sid) => A.score(GRID[sid], W);
 const bestId = (sid) => ranked(sid)[0].id;
 const bestSt = (sid) => GRID[sid][bestId(sid)];
@@ -392,6 +412,19 @@ const subL = L.geoJSON(K.geo.suburbs, {
 map.fitBounds(subL.getBounds(), { padding: [10, 10] });
 const routeBy = {};
 const routeL = L.geoJSON(K.geo.feeders, { style: () => ({ color: "#0b0b0b", weight: 1.5, opacity: 0.75 }), onEachFeature: (f, l) => { routeBy[f.properties.sid] = l; l.bindTooltip(() => routeTip(f.properties.sid), { className: "tt", sticky: true }); } }).addTo(map);
+// Wholesale corridors: restock totes from the wholesale district (Kikuubo/Owino) to each hub along the trunk road, width by stock value a day.
+const WHOLESALE = [0.3128, 32.5745];
+const corrL = L.layerGroup();
+function drawCorr() {
+  corrL.clearLayers();
+  const byHub = {};
+  SUBS.forEach((s) => { const st = bestSt(s.sid); byHub[s.hub] = (byHub[s.hub] || 0) + (st.restockVal ? st.restockVal[1] : 0); });
+  const mx = Math.max(1e-9, ...Object.values(byHub));
+  K.geo.trunks.features.forEach((f) => { const v = byHub[f.properties.hub] || 0; if (v <= 0) return;
+    L.geoJSON(f, { style: { color: "#1baf7a", weight: 1.5 + 9 * Math.sqrt(v / mx), opacity: 0.85 } }).bindTooltip(`<b>${f.properties.hub}</b><br>UGX ${nf(v, 1)}m of shop stock a day from the wholesale district`, { className: "tt", sticky: true }).addTo(corrL); });
+  L.circleMarker(WHOLESALE, { radius: 9, color: "#fff", weight: 2, fillColor: "#0b0b0b", fillOpacity: 1 }).bindTooltip("Kikuubo and Owino wholesale district", { className: "tt" }).addTo(corrL);
+}
+$("showCorr").onchange = (e) => { if (e.target.checked) { drawCorr(); corrL.addTo(map); } else map.removeLayer(corrL); };
 $("showRoutes").onchange = (e) => (e.target.checked ? routeL.addTo(map) : map.removeLayer(routeL));
 const legend = L.control({ position: "bottomleft" });
 legend.onAdd = () => { const d = L.DomUtil.create("div", "legend"); d.id = "legend"; return d; };
@@ -410,9 +443,11 @@ function layerVal(sid, key) {
     case "pev": return pEV(sid);
     case "boda": return st.bodaEarn[1];
     case "riders": return st.riders[1];
+    case "plat": return st.pPlatform;
+    case "restock": return st.rsOn[1];
   }
 }
-function pEV(sid) { const g = GRID[sid], e = g["e14|learn|1"].npvRuns, d = g["ice14|learn|1"].npvRuns; return e.filter((v, i) => v > d[i]).length / e.length; }
+function pEV(sid) { const g = GRID[sid], e = g["e14|learn|BC"].npvRuns, d = g["ice14|learn|BC"].npvRuns; return e.filter((v, i) => v > d[i]).length / e.length; }
 let colorFn = null;
 function styleSuburb(sid) { const l = polyBy[sid]; if (l && colorFn) l.setStyle({ fillColor: colorFn(sid) }); }
 function restyle() {
@@ -421,6 +456,13 @@ function restyle() {
     colorFn = (sid) => famOf(bestId(sid)).c;
     const cnt = {}; SUBS.forEach((s) => { const f = famOf(bestId(s.sid)).key; cnt[f] = (cnt[f] || 0) + 1; });
     html = "<b>Best option</b>" + FAM.map((f) => `<div><i style="background:${f.c}"></i>${f.label} <span class="note">${cnt[f.key] || 0}</span></div>`).join("");
+  } else if (key === "agg") {
+    colorFn = (sid) => aggOf(bestId(sid))[2];
+    const cnt = {}; SUBS.forEach((s) => { const a = aggOf(bestId(s.sid))[0]; cnt[a] = (cnt[a] || 0) + 1; });
+    html = "<b>Aggregator setting in the best option</b>" + AGGC.map(([k, l, c]) => `<div><i style="background:${c}"></i>${l} <span class="note">${cnt[k] || 0}</span></div>`).join("");
+  } else if (key === "plat") {
+    colorFn = (sid) => SEQ[Math.min(5, Math.floor(layerVal(sid, key) * 6))];
+    html = "<b>Chance the aggregator covers its costs</b><div class='note'>best option, share of futures</div>" + ["0–17%", "17–33%", "33–50%", "50–67%", "67–83%", "83–100%"].map((t, i) => `<div><i style="background:${SEQ[i]}"></i>${t}</div>`).join("");
   } else if (key === "pev") {
     const ramp = SEQ;
     colorFn = (sid) => ramp[Math.min(5, Math.floor(Math.max(0, pEV(sid) - 0.5) / 0.5 * 6))];
@@ -434,7 +476,7 @@ function restyle() {
     const vals = SUBS.map((s) => layerVal(s.sid, key)); const b = binner(vals, SEQ);
     colorFn = (sid) => b.f(layerVal(sid, key));
     const fm = key === "npv" ? (v) => usdm(v, 1) : (v) => nf(v);
-    const names = { welfare: "Gain per household (UGX/month)", jobs: "Net jobs", npv: "Operator NPV (USD m)", riders: "Riders per day" };
+    const names = { welfare: "Gain per household (UGX/month)", jobs: "Net jobs", npv: "Operator NPV (USD m)", riders: "Riders per day", restock: "Shops restocking via the aggregator" };
     html = `<b>${names[key]}</b>` + SEQ.map((c, i) => `<div><i style="background:${c}"></i>${i === 0 ? "up to " + fm(b.qs[0]) : i === SEQ.length - 1 ? "over " + fm(b.qs[i - 1]) : fm(b.qs[i - 1]) + " – " + fm(b.qs[i])}</div>`).join("");
   }
   SUBS.forEach((s) => styleSuburb(s.sid));
@@ -517,7 +559,7 @@ function mix() {
   return {
     ids, st, riders: sum(st.map((x) => x.riders[1])), fleet: sum(st.map((x) => x.fleet[1])), jobs: sum(st.map((x) => x.jobsNet[1])),
     welfare: sum(st.map((x, i) => x.welfare[1] * hh[i])) / sum(hh), npv: sum(st.map((x) => x.npv[1])), city: sum(st.map((x) => x.city[1])),
-    orders: sum(st.map((x) => x.orders[1])), co2: sum(st.map((x) => x.co2[1])), famYr: sum(st.map((x, i) => x.welfare[1] * hh[i])) * 12 / FX / 1e6,
+    orders: sum(st.map((x) => x.orders[1])), restock: sum(st.map((x) => x.rsOn[1])), co2: sum(st.map((x) => x.co2[1])), famYr: sum(st.map((x, i) => x.welfare[1] * hh[i])) * 12 / FX / 1e6,
     pev: sum(SUBS.map((s) => pEV(s.sid))) / SUBS.length, profitShare: sum(st.map((x) => x.pProfit)) / st.length,
   };
 }
@@ -526,7 +568,7 @@ function heroTiles() {
   const M = mix();
   $("heroTiles").innerHTML = tile("Riders per day", nf(M.riders), "best option in each suburb, median future") + tile("Family gain", ugx(M.welfare), "per household per month in served suburbs")
     + tile("Value to families", usdm(M.famYr, 0) + "/yr", "money and time, all 100 suburbs") + tile("Net new jobs", nf(M.jobs), "after boda riders who leave")
-    + tile("E-shuttle beats diesel", Math.round(M.pev * 100) + "%", "of suburb-futures, same fares and families") + tile("Orders per day", nf(M.orders), "through the local aggregator")
+    + tile("E-shuttle beats diesel", Math.round(M.pev * 100) + "%", "of suburb-futures, same fares and families") + tile("Aggregator", nf(M.orders) + " orders", `a day, and ${nf(M.restock)} shops restocking`)
     + tile("Operator NPV", usdm(M.npv, 0), `city subsidy ${usdm(M.city, 1)}/yr`);
   const cnt = {}; M.ids.forEach((id) => { const f = famOf(id).label; cnt[f] = (cnt[f] || 0) + 1; });
   $("heroNote").textContent = "Best options under the current weights: " + Object.entries(cnt).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} in ${v}`).join("; ") + ".";
@@ -537,7 +579,6 @@ function heroTiles() {
 function families() {
   const M = mix();
   const bodaB = sum(M.st.map((x) => x.bodaEarn[1] * 1)) / M.st.length;
-  const ag = M.st.filter((x, i) => M.ids[i].endsWith("|1"));
   $("famTiles").innerHTML = tile("Average gain", ugx(M.welfare), "per household per month") + tile("Highest-gain suburb", ugx(Math.max(...M.st.map((x) => x.welfare[1]))), SUBS[M.st.indexOf(M.st.reduce((a, b) => (b.welfare[1] > a.welfare[1] ? b : a)))].name)
     + tile("Boda rider earnings", Math.round(100 * sum(M.st.map((x) => x.bodaPct[1])) / M.st.length) + "%", `about ${ugx(bodaB)} per rider per month, average suburb`) + tile("Ex-boda riders re-employed", nf(sum(M.st.map((x) => x.exBoda[1]))), "as shuttle drivers and couriers");
   // usage by income third
@@ -575,7 +616,7 @@ function hover(svg) { svg.querySelectorAll("[data-t]").forEach((el) => { el.addE
 
 /* ---------- Jobs ---------- */
 function jobs() {
-  const sets = [["Best option mix", (sid) => bestSt(sid)], ["All e-shuttles, learning fares + aggregator", (sid) => GRID[sid]["e14|learn|1"]], ["All diesel taxis, learning fares + aggregator", (sid) => GRID[sid]["ice14|learn|1"]]];
+  const sets = [["Best option mix", (sid) => bestSt(sid)], ["All e-shuttles, learning fares, pickup + restocking", (sid) => GRID[sid]["e14|learn|BC"]], ["All diesel taxis, learning fares, pickup + restocking", (sid) => GRID[sid]["ice14|learn|BC"]]];
   const parts = [["drivers", "Drivers", "#2a78d6"], ["tech", "Depot and charging", "#1baf7a"], ["plant", "Kiira plant (job-years)", "#6250d6"], ["couriers", "Couriers", "#eb6834"], ["shopJobs", "Shops (net)", "#eda100"]];
   $("jobKey").innerHTML = parts.map(([, l, c]) => `<span><i class="sq" style="background:${c}"></i>${l}</span>`).join("") + `<span><i class="sq" style="background:#e34948"></i>Boda riders leaving</span>`;
   const data = sets.map(([l, f]) => ({ l, v: parts.map(([k]) => sum(SUBS.map((s) => f(s.sid)[k][1]))), lost: sum(SUBS.map((s) => f(s.sid).bodaLost[1])) }));
@@ -605,9 +646,9 @@ function routes() {
 /* ---------- Electric 14-seater ---------- */
 function ev() {
   const diffs = [], pe = [], cE = [], cD = [];
-  SUBS.forEach((s) => { const g = GRID[s.sid], e = g["e14|learn|1"], d = g["ice14|learn|1"]; e.npvRuns.forEach((v, i) => diffs.push(v - d.npvRuns[i])); pe.push(pEV(s.sid)); cE.push(e.costRide); cD.push(d.costRide); });
-  const fuel = sum(SUBS.map((s) => GRID[s.sid]["ice14|learn|1"].fuelUsd[1])), co2E = sum(SUBS.map((s) => GRID[s.sid]["e14|learn|1"].co2[1])), co2D = sum(SUBS.map((s) => GRID[s.sid]["ice14|learn|1"].co2[1]));
-  const adv = sum(SUBS.map((s) => GRID[s.sid]["e14|learn|1"].npv[1] - GRID[s.sid]["ice14|learn|1"].npv[1]));
+  SUBS.forEach((s) => { const g = GRID[s.sid], e = g["e14|learn|BC"], d = g["ice14|learn|BC"]; e.npvRuns.forEach((v, i) => diffs.push(v - d.npvRuns[i])); pe.push(pEV(s.sid)); cE.push(e.costRide); cD.push(d.costRide); });
+  const fuel = sum(SUBS.map((s) => GRID[s.sid]["ice14|learn|BC"].fuelUsd[1])), co2E = sum(SUBS.map((s) => GRID[s.sid]["e14|learn|BC"].co2[1])), co2D = sum(SUBS.map((s) => GRID[s.sid]["ice14|learn|BC"].co2[1]));
+  const adv = sum(SUBS.map((s) => GRID[s.sid]["e14|learn|BC"].npv[1] - GRID[s.sid]["ice14|learn|BC"].npv[1]));
   $("evTiles").innerHTML = tile("E-shuttle earns more", Math.round(diffs.filter((v) => v > 0).length / diffs.length * 100) + "%", `of ${nf(diffs.length)} suburb-futures`) + tile("Lowest chance in any suburb", Math.round(Math.min(...pe) * 100) + "%", "the e-shuttle still wins most futures everywhere")
     + tile("Extra 10-year value", usdm(adv, 0), "all 100 suburbs, median futures") + tile("Diesel imports avoided", usdm(fuel, 1) + "/yr", "fuel the diesel fleet would burn") + tile("CO₂ difference", nf(co2E - co2D) + " t/yr", "e-shuttle fleet vs diesel fleet")
     + tile("Cost per ride", ugx(med(cE.map((c) => c[1]))) + " vs " + ugx(med(cD.map((c) => c[1]))), "e-shuttle vs diesel, median suburb");
@@ -623,7 +664,7 @@ function ev() {
   g += `<text x="${w - m.r}" y="${h - 4}" text-anchor="end" class="lbl">E-shuttle minus diesel, 10-year NPV per suburb</text><text x="${sx(0) + 4}" y="${m.t + 10}">diesel better ← | → e-shuttle better</text>`;
   svg.innerHTML = g; hover(svg);
   // cost per ride ranges
-  const vs = [["e14|learn|1", "Kiira e-shuttle 14", "#1baf7a"], ["midi|learn|1", "Kayoola e-midi 8 m", "#6250d6"], ["ice14|learn|1", "Diesel taxi 14", "#898781"]];
+  const vs = [["e14|learn|BC", "Kiira e-shuttle 14", "#1baf7a"], ["midi|learn|BC", "Kayoola e-midi 8 m", "#6250d6"], ["ice14|learn|BC", "Diesel taxi 14", "#898781"]];
   $("cprKey").innerHTML = vs.map(([, l, c]) => `<span><i class="sq" style="background:${c}"></i>${l}</span>`).join("");
   const rows = vs.map(([id, l, c]) => { const v = SUBS.filter((s) => GRID[s.sid][id]).map((s) => GRID[s.sid][id].costRide); return { l, c, lo: med(v.map((x) => x[0])), md: med(v.map((x) => x[1])), hi: med(v.map((x) => x[2])), n: v.length }; });
   const c2 = $("cprChart"), mx = Math.max(...rows.map((r) => r.hi)) * 1.1, bh = (h - m.t - m.b) / rows.length, s2 = (v) => 150 + (v / mx) * (w - 160);
@@ -635,16 +676,43 @@ function ev() {
 
 /* ---------- Aggregator ---------- */
 function agg() {
-  const st = SUBS.map((s) => GRID[s.sid]["e14|learn|1"]);
-  const orders = sum(st.map((x) => x.orders[1])), shops = sum(st.map((x) => x.shopsOn[1])), cour = sum(st.map((x) => x.couriers[1])), plat = sum(st.map((x) => x.platform[1]));
-  const lossSubs = st.filter((x) => x.platform[1] < 0).length;
-  $("aggTiles").innerHTML = tile("Orders per day", nf(orders), "all 100 suburbs, median future") + tile("Shops listed", nf(shops), "of " + nf(sum(SUBS.map((s) => s.pop / A.DEFAULTS.shopsPer))) + " small shops")
-    + tile("Courier jobs", nf(cour), "about 40 deliveries a day each") + tile("Saving per ordering family", ugx(med(SUBS.map((s, i) => st[i].agg[1] * (s.pop / A.DEFAULTS.hhSize) / Math.max(1, st[i].orders[1] * 6 / A.DEFAULTS.ordersWeek)))), "per month, after the delivery fee")
-    + tile("Extra margin per shop", ugx(med(st.map((x) => x.shopGain[1]))), "per month after commission") + tile("Platform profit", usdm(plat, 2) + "/yr", lossSubs ? `${lossSubs} suburbs lose money on their own` : "covers its costs in every suburb at these settings");
-  const steps = [["Shop", "lists goods, packs a tote"], ["Hub", "totes consolidated"], ["Feeder, off-peak", "carries totes in empty seats"], ["Stop", "courier collects"], ["Door", "on foot or e-bike, last 300 m"]];
-  let g = ""; const bw = 170, gap = (1000 - steps.length * bw) / (steps.length - 1);
-  steps.forEach(([t, d], i) => { const x = i * (bw + gap); g += `<rect x="${x}" y="20" width="${bw}" height="70" rx="10" fill="#fcfcfb" stroke="#c3c2b7"/><text x="${x + bw / 2}" y="50" text-anchor="middle" class="lbl" style="font-size:14px">${t}</text><text x="${x + bw / 2}" y="70" text-anchor="middle">${d}</text>`; if (i < steps.length - 1) g += `<path d="M${x + bw + 4},55 L${x + bw + gap - 6},55" stroke="#eb6834" stroke-width="2.5" marker-end="url(#ah)"/>`; });
-  $("aggFlow").innerHTML = `<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#eb6834"/></marker></defs>` + g;
+  const hh = (s) => s.pop / A.DEFAULTS.hhSize, H = sum(SUBS.map(hh));
+  const rows = AGGC.map(([k, l, c]) => {
+    const id = "e14|learn|" + k, st = SUBS.map((s) => GRID[s.sid][id]);
+    const S = (f) => sum(st.map(f));
+    return { k, l, c, orders: S((x) => x.orders[1]), drops: S((x) => x.drops[1]), shops: S((x) => x.rsOn[1]), fam: sum(st.map((x, i) => x.famAll[1] * hh(SUBS[i]))) / H,
+      shopSave: med(st.filter((x) => x.rsOn[1] > 0).map((x) => x.restockSave[1]).concat([0])), plat: [S((x) => x.platform[0]), S((x) => x.platform[1]), S((x) => x.platform[2])],
+      pPlat: S((x) => x.pPlatform) / st.length, boda: S((x) => x.bodaPct[1]) / st.length, jobs: S((x) => x.jobsNet[1]), moved: S((x) => x.diverted[1]), haul: S((x) => (x.haulOp[1] > 0 ? 1 : 0)) };
+  });
+  const base = rows[0];
+  $("aggTable").innerHTML = `<tr><th>Setting</th><th>Household orders/day</th><th>Restock drops/day</th><th>Shops restocking</th><th>Gain per household, incl. shopkeepers (UGX/month)</th><th>Saving per restocking shop (UGX/month)</th><th>Platform profit ($m/yr)</th><th>Pays its way</th><th>Boda earnings</th><th>Net jobs</th><th>Sales moved ($m/month)</th></tr>` +
+    rows.map((r) => `<tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${r.c};margin-right:6px"></span>${r.l}</td><td>${nf(r.orders)}</td><td>${nf(r.drops)}</td><td>${nf(r.shops)}</td><td>${nf(r.fam)}</td><td>${r.shopSave ? nf(r.shopSave) : "–"}</td><td>${r.k === "0" ? "–" : usdm(r.plat[1], 2).replace("m", "")}</td><td>${r.k === "0" ? "–" : Math.round(r.pPlat * 100) + "% of futures"}</td><td>${Math.round(r.boda * 100)}%</td><td>${nf(r.jobs)}</td><td>${nf(r.moved, 2)}</td></tr>`).join("");
+  // boda chart
+  const bar = (svgId, vals, fmt, tipf) => {
+    const svg = $(svgId), w = 560, h = 250, m = { l: 150, r: 70, t: 8, b: 24 }, bh = (h - m.t - m.b) / rows.length;
+    const lo = Math.min(0, ...vals.map((v) => (Array.isArray(v) ? v[0] : v))), hi = Math.max(0, ...vals.map((v) => (Array.isArray(v) ? v[2] : v)));
+    const x = (v) => m.l + ((v - lo) / (hi - lo || 1)) * (w - m.l - m.r);
+    let g = `<line class="ax" x1="${x(0)}" x2="${x(0)}" y1="${m.t}" y2="${h - m.b}"/>`;
+    rows.forEach((r, j) => { const v = vals[j], y = m.t + j * bh + bh * 0.2, hh_ = bh * 0.6; g += `<text x="${m.l - 8}" y="${y + hh_ / 2 + 4}" text-anchor="end">${r.l}</text>`;
+      if (Array.isArray(v)) { if (r.k === "0") return; g += `<rect x="${x(v[0])}" y="${y + hh_ * 0.3}" width="${Math.max(1, x(v[2]) - x(v[0]))}" height="${hh_ * 0.4}" rx="3" fill="${r.c}" opacity=".35"/><rect x="${x(v[1]) - 2}" y="${y}" width="4" height="${hh_}" rx="2" fill="${r.c}" data-t="${tipf(r)}"/><text x="${x(v[2]) + 6}" y="${y + hh_ / 2 + 4}" class="lbl">${fmt(v[1])}</text>`; }
+      else { const x0 = Math.min(x(0), x(v)), ww = Math.abs(x(v) - x(0)); g += `<rect x="${x0}" y="${y}" width="${Math.max(1, ww)}" height="${hh_}" rx="3" fill="${r.c}" data-t="${tipf(r)}"/><text x="${v < 0 ? x0 + 6 : x0 + ww + 4}" y="${y + hh_ / 2 + 4}" text-anchor="start" class="lbl" style="${v < 0 && ww > 40 ? "fill:#fff" : ""}">${fmt(v)}</text>`; } });
+    svg.innerHTML = g; hover(svg);
+  };
+  bar("bodaAgg", rows.map((r) => r.boda * 100), (v) => Math.round(v) + "%", (r) => `<b>${r.l}</b><br>Boda rider earnings ${Math.round(r.boda * 100)}% (average suburb)`);
+  bar("platAgg", rows.map((r) => r.plat), (v) => usdm(v, 2) + "/yr", (r) => `<b>${r.l}</b><br>median ${usdm(r.plat[1], 2)}/yr (${usdm(r.plat[0], 2)} to ${usdm(r.plat[2], 2)})<br>covers its costs in ${Math.round(r.pPlat * 100)}% of futures`);
+  // haul tiles: e-shuttle vs diesel with restocking
+  const hE = SUBS.map((s) => GRID[s.sid]["e14|learn|BC"]), hD = SUBS.map((s) => GRID[s.sid]["ice14|learn|BC"]);
+  const nE = hE.filter((x) => x.haulOp[1] > 0).length, nD = hD.filter((x) => x.haulOp[1] > 0).length;
+  $("haulTiles").innerHTML = tile("Suburbs where idle e-shuttles take the haul", nE + " of 100", "median future") + tile("Where idle diesel taxis would", nD + " of 100", "diesel costs too much per km")
+    + tile("Extra operator margin (e-shuttles)", usdm(sum(hE.map((x) => x.haulMargin[1])), 2) + "/yr", "after energy, wear and lost private hire")
+    + tile("Cargo revenue per e-shuttle", "$" + nf(sum(hE.map((x) => x.cargoRev[1])) * 1e6 / Math.max(1, sum(hE.map((x) => x.fleet[1])))) + "/yr", "tote fees plus haul margin");
+  // flow diagram: two lanes
+  const lane = (y, steps, col) => { const bw = 150, gap = (1000 - steps.length * bw) / (steps.length - 1); let g = "";
+    steps.forEach(([t, d], i) => { const x = i * (bw + gap); g += `<rect x="${x}" y="${y}" width="${bw}" height="56" rx="10" fill="#fcfcfb" stroke="#c3c2b7"/><text x="${x + bw / 2}" y="${y + 24}" text-anchor="middle" class="lbl" style="font-size:13px">${t}</text><text x="${x + bw / 2}" y="${y + 42}" text-anchor="middle" style="font-size:11px">${d}</text>`;
+      if (i < steps.length - 1) g += `<path d="M${x + bw + 4},${y + 28} L${x + bw + gap - 6},${y + 28}" stroke="${col}" stroke-width="2.5" marker-end="url(#ah_${col.slice(1)})"/>`; }); return g; };
+  const mk = (c) => `<marker id="ah_${c.slice(1)}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${c}"/></marker>`;
+  $("aggFlow").innerHTML = `<defs>${mk("#eb6834")}${mk("#1baf7a")}</defs>` + lane(4, [["Nearby shop", "packs the order"], ["Feeder, off-peak", "tote in empty seats"], ["Stop", "locker or kiosk (pickup)"], ["Door", "boda hop (delivery)"]], "#eb6834")
+    + lane(84, [["Wholesale district", "Kikuubo, Owino"], ["Hub", "van or idle e-shuttle"], ["Feeder, midday", "rack + folded seats"], ["Shop", "at the stop, or boda hop"]], "#1baf7a");
 }
 
 /* ---------- Roll-out map ---------- */
@@ -690,7 +758,7 @@ $("play").onclick = () => {
 $("uncTable").innerHTML = "<tr><th>Uncertain input</th><th>Low</th><th>High</th></tr>" + A.UNCERTAIN.map((u) => `<tr><td>${u.label}</td><td>${nf(u.lo, u.lo < 10 ? 2 : 0)}</td><td>${nf(u.hi, u.hi < 10 ? 2 : 0)}</td></tr>`).join("")
   + "<tr><th>Fixed assumption</th><th colspan=2>Value</th></tr>" + [["Sample households per suburb", A.DEFAULTS.agents], ["Weeks simulated", A.DEFAULTS.weeks], ["Household size", A.DEFAULTS.hhSize], ["Launch fleet (share of plan)", "85%"], ["Vehicle delivery lead time", "8 weeks"], ["E-shuttle price", "USD 42,000"], ["Diesel taxi price", "USD 30,000"], ["Diesel use", "0.11 L/km"], ["E-shuttle energy", "0.22 kWh/km"], ["Boda bike rent", "UGX 15,000/day"], ["Order value", "UGX 15,000"], ["Couriers", "40 orders/day each"], ["Discount rate", "12% real, 10 years"]].map(([a, b]) => `<tr><td>${a}</td><td colspan=2>${b}</td></tr>`).join("");
 
-function refresh(light) { restyle(); heroTiles(); if (!light) { families(); jobs(); routes(); ev(); agg(); } if (curSid != null && !light) openSuburb(curSid); }
+function refresh(light) { restyle(); heroTiles(); if ($("showCorr").checked) drawCorr(); if (!light) { families(); jobs(); routes(); ev(); agg(); } if (curSid != null && !light) openSuburb(curSid); }
 refresh(); setNet();
 window.labMap = map; window.labMap2 = map2; window.labPoly = polyBy; window.labOpen = openSuburb; // used by the how-to film script
 if (/autorun/.test(location.hash)) { $("reps").value = "4"; startRun(); }

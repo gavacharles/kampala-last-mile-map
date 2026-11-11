@@ -20,7 +20,7 @@ onmessage = (e) => {
   }
   if (m.type === "net") {
     // Network roll-out with each suburb on its chosen option (ids from the page's ranking).
-    const net = A.network(m.subs, m.params, (s) => { const id = m.choice[s.sid].split("|"); return { vehicle: id[0], pricing: id[1], agg: id[2] === "1" }; });
+    const net = A.network(m.subs, m.params, (s) => A.parseId(m.choice[s.sid]));
     postMessage({ type: "network", net: { startWeek: net.startWeek, weeks: net.weeks.map((w) => ({ wk: w.wk, riders: w.riders, fleet: w.fleet, boda: w.boda, orders: w.orders, live: w.suburbsLive, by: w.by })) } });
   }
   if (m.type === "one") {
