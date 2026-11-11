@@ -67,7 +67,7 @@ button:disabled{opacity:.5;cursor:default}
 .legend{background:rgba(252,252,251,.95);padding:8px 10px;border-radius:8px;font-size:12px;line-height:1.5;box-shadow:0 1px 4px rgba(0,0,0,.12);max-width:240px}
 .legend i{display:inline-block;width:14px;height:10px;margin-right:6px;vertical-align:-1px;border-radius:2px}
 .legend b{display:block;margin-bottom:2px}
-.leaflet-tooltip.tt{background:var(--surface);border:1px solid var(--rule);border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.14);padding:8px 10px;font:13px/1.45 var(--f);color:var(--ink);min-width:240px}
+.leaflet-tooltip.tt{background:var(--surface);border:1px solid var(--rule);border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.14);padding:8px 10px;font:13px/1.45 var(--f);color:var(--ink);min-width:240px;width:300px;white-space:normal}
 .top3{list-style:none;padding:0;margin:6px 0 0}
 .top3 li{display:grid;grid-template-columns:16px 1fr 46px;gap:6px;align-items:center;margin:3px 0;font-size:12.5px}
 .top3 .sw{width:12px;height:12px;border-radius:3px}
@@ -98,6 +98,9 @@ th{color:var(--ink2);font-weight:600;background:var(--surface);position:sticky;t
 .range .md{position:absolute;top:2px;width:2px;height:10px;background:var(--ink)}
 .fam{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
 .fam .card h4{margin:0 0 4px;font-size:15px}
+.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.galw{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:900px){.gal{grid-template-columns:1fr 1fr}.galw{grid-template-columns:1fr}}
+.gal img,.galw img{width:100%;display:block;border:1px solid var(--rule);border-radius:8px;background:#fff}
 footer{max-width:1280px;margin:0 auto;padding:18px 16px 40px;font-size:12.5px;color:var(--muted)}
 </style>
 </head>
@@ -105,7 +108,7 @@ footer{max-width:1280px;margin:0 auto;padding:18px 16px 40px;font-size:12.5px;co
 <div class="top"><div class="in">
   <div class="brand">Kiira EV Last Mile <small>Futures lab · agent-based model</small></div>
   <nav>
-    <a href="#how">Agents</a><a href="#map-s">Best three</a><a href="#families">Families</a><a href="#jobs">Jobs</a><a href="#routes">Routes</a><a href="#ev">Electric 14-seater</a><a href="#agg">Aggregator</a><a href="#rollout">Roll-out</a><a href="#method">Method</a><a href="../">← Main Kiira page</a>
+    <a href="#how">Agents</a><a href="#map-s">Best three</a><a href="#families">Families</a><a href="#jobs">Jobs</a><a href="#routes">Routes</a><a href="#ev">Electric 14-seater</a><a href="#agg">Aggregator</a><a href="#rollout">Roll-out</a><a href="#gallery">Maps &amp; charts</a><a href="#method">Method</a><a href="../">← Main Kiira page</a>
   </nav>
 </div></div>
 <main>
@@ -210,6 +213,31 @@ footer{max-width:1280px;margin:0 auto;padding:18px 16px 40px;font-size:12.5px;co
   </div>
   <div class="mapwrap"><div id="map2" class="map" style="height:min(60vh,560px)"></div>
     <div class="card"><div class="tiles" id="rollTiles" style="grid-template-columns:1fr 1fr"></div><div class="keyrow" id="rollKey"></div><svg class="chart" id="rollChart" viewBox="0 0 360 200"></svg></div></div>
+</section>
+
+<section id="gallery">
+  <h2>Maps and charts</h2>
+  <p class="sub">Print-ready sheets from the same agent runs (central settings, 12 futures per option, default weights). Click any image for full size.</p>
+  <h3>Maps</h3>
+  <div class="gal">
+    <a href="img/F1_best_option.jpg"><img src="img/F1_best_option.jpg" alt="Map of the best option for each suburb" loading="lazy"></a>
+    <a href="img/F2_family_gain.jpg"><img src="img/F2_family_gain.jpg" alt="Map of gain per household per month" loading="lazy"></a>
+    <a href="img/F3_net_jobs.jpg"><img src="img/F3_net_jobs.jpg" alt="Map of net new jobs" loading="lazy"></a>
+    <a href="img/F4_boda_earnings.jpg"><img src="img/F4_boda_earnings.jpg" alt="Map of boda rider earnings change" loading="lazy"></a>
+    <a href="img/F5_ev_vs_diesel.jpg"><img src="img/F5_ev_vs_diesel.jpg" alt="Map of e-shuttle NPV advantage over diesel" loading="lazy"></a>
+    <a href="img/F6_aggregator_orders.jpg"><img src="img/F6_aggregator_orders.jpg" alt="Map of aggregator orders per day" loading="lazy"></a>
+  </div>
+  <h3>Charts</h3>
+  <div class="galw">
+    <a href="img/D1_two_years_three_suburbs.jpg"><img src="img/D1_two_years_three_suburbs.jpg" alt="Riders over two years in three suburbs, every future" loading="lazy"></a>
+    <a href="img/D2_electric_vs_diesel.jpg"><img src="img/D2_electric_vs_diesel.jpg" alt="Electric 14-seater against diesel taxi" loading="lazy"></a>
+    <a href="img/D3_jobs.jpg"><img src="img/D3_jobs.jpg" alt="Jobs gained and lost" loading="lazy"></a>
+    <a href="img/D4_families.jpg"><img src="img/D4_families.jpg" alt="Who rides and what families gain" loading="lazy"></a>
+    <a href="img/D5_rollout.jpg"><img src="img/D5_rollout.jpg" alt="Roll-out over time" loading="lazy"></a>
+    <a href="img/D6_uncertainty_and_weights.jpg"><img src="img/D6_uncertainty_and_weights.jpg" alt="Uncertainty margins and the effect of weights" loading="lazy"></a>
+  </div>
+  <h3>How to use this lab</h3>
+  <video src="img/A10_how_to_futures_lab.mp4" controls playsinline preload="metadata" style="width:100%;max-width:960px;border-radius:8px;border:1px solid var(--rule);background:#000"></video>
 </section>
 
 <section id="method">
@@ -664,6 +692,7 @@ $("uncTable").innerHTML = "<tr><th>Uncertain input</th><th>Low</th><th>High</th>
 
 function refresh(light) { restyle(); heroTiles(); if (!light) { families(); jobs(); routes(); ev(); agg(); } if (curSid != null && !light) openSuburb(curSid); }
 refresh(); setNet();
+window.labMap = map; window.labMap2 = map2; window.labPoly = polyBy; window.labOpen = openSuburb; // used by the how-to film script
 if (/autorun/.test(location.hash)) { $("reps").value = "4"; startRun(); }
 const hs = location.hash.match(/s=(\d+)/); if (hs && BY[+hs[1]]) { openSuburb(+hs[1]); polyBy[+hs[1]] && map.fitBounds(polyBy[+hs[1]].getBounds(), { maxZoom: 13 }); }
 </script>
