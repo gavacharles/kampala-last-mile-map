@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kiira Futures Lab: Greater Kampala</title>
+<meta name="description" content="An agent-based model of Kiira electric shuttles in 100 Greater Kampala suburbs: households, operators, boda riders, shops and the plant. Best three options per suburb for families, jobs, money, robustness and climate.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="author" content="Gava Charles">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{
+  --bg:#f6f6f3; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781; --rule:#e1e0d9; --base:#c3c2b7;
+  --blue:#2a78d6; --blue-l:#9ec5f4; --orange:#eb6834; --aqua:#1baf7a; --yellow:#eda100; --violet:#6250d6; --red:#e34948; --good:#006300; --grey:#898781;
+  --r:10px; --f:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--f)}
+a{color:var(--blue)}
+.top{position:sticky;top:0;z-index:1000;background:rgba(252,252,251,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--rule)}
+.top .in{max-width:1280px;margin:0 auto;padding:10px 16px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.brand{font-weight:700;letter-spacing:-.01em}
+.brand small{font-weight:400;color:var(--muted);margin-left:6px}
+nav{display:flex;gap:4px;flex-wrap:wrap;font-size:13.5px}
+nav a{color:var(--ink2);text-decoration:none;padding:4px 8px;border-radius:6px}
+nav a:hover{background:var(--rule);color:var(--ink)}
+main{max-width:1280px;margin:0 auto;padding:0 16px 60px}
+section{padding:42px 0 18px;border-bottom:1px solid var(--rule)}
+section:last-child{border-bottom:0}
+h1{font-size:clamp(28px,4vw,44px);line-height:1.1;letter-spacing:-.02em;margin:0 0 12px}
+h2{font-size:26px;letter-spacing:-.01em;margin:0 0 6px}
+h3{font-size:16px;margin:18px 0 6px}
+.lede{font-size:18px;color:var(--ink2);max-width:880px;margin:0 0 22px}
+.sub{color:var(--ink2);max-width:900px;margin:0 0 18px}
+.note{font-size:12.5px;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:0 0 16px}
+.tile{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);padding:12px 14px}
+.tile .k{font-size:12.5px;color:var(--muted)}
+.tile .v{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.2;font-variant-numeric:tabular-nums}
+.tile .d{font-size:12px;color:var(--ink2)}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);padding:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+select,button,input[type=number]{font:inherit;font-size:13.5px}
+select{padding:5px 8px;border:1px solid var(--base);border-radius:6px;background:var(--surface)}
+button{padding:6px 12px;border:1px solid var(--base);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--ink)}
+button:hover{border-color:var(--ink2)}
+button.on,button.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+button:disabled{opacity:.5;cursor:default}
+.controls{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px 18px;margin:6px 0 12px}
+.ctl{font-size:13px}
+.ctl .row{display:flex;justify-content:space-between;color:var(--ink2);gap:8px}
+.ctl output{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.ctl input[type=range]{width:100%;accent-color:var(--blue)}
+.runbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px}
+.prog{flex:1;min-width:180px;height:8px;background:var(--rule);border-radius:4px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--blue);transition:width .2s}
+.mapbar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:0 0 10px}
+.mapbar label{font-size:13px;color:var(--ink2)}
+.mapwrap{display:grid;grid-template-columns:1fr 360px;gap:12px}
+@media (max-width:900px){.mapwrap{grid-template-columns:1fr}}
+.map{height:min(70vh,680px);min-height:420px;border-radius:var(--r);border:1px solid var(--rule)}
+#panel{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);padding:14px;max-height:min(70vh,680px);overflow:auto;font-size:14px}
+#panel h3{margin-top:0;font-size:19px}
+.legend{background:rgba(252,252,251,.95);padding:8px 10px;border-radius:8px;font-size:12px;line-height:1.5;box-shadow:0 1px 4px rgba(0,0,0,.12);max-width:240px}
+.legend i{display:inline-block;width:14px;height:10px;margin-right:6px;vertical-align:-1px;border-radius:2px}
+.legend b{display:block;margin-bottom:2px}
+.leaflet-tooltip.tt{background:var(--surface);border:1px solid var(--rule);border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.14);padding:8px 10px;font:13px/1.45 var(--f);color:var(--ink);min-width:240px}
+.top3{list-style:none;padding:0;margin:6px 0 0}
+.top3 li{display:grid;grid-template-columns:16px 1fr 46px;gap:6px;align-items:center;margin:3px 0;font-size:12.5px}
+.top3 .sw{width:12px;height:12px;border-radius:3px}
+.top3 .bar{height:6px;background:var(--rule);border-radius:3px;position:relative;grid-column:2/3}
+.top3 .num{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink2)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--rule);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--ink2);font-weight:600;background:var(--surface);position:sticky;top:0}
+.tablewrap{max-height:460px;overflow:auto;border:1px solid var(--rule);border-radius:var(--r);background:var(--surface)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:13px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-variant-numeric:tabular-nums}
+.chart{width:100%;height:auto;display:block;overflow:visible}
+.chart text{font:11.5px var(--f);fill:var(--ink2)}
+.chart .ax{stroke:var(--rule)}
+.chart .lbl{fill:var(--ink);font-weight:600}
+.keyrow{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--ink2);margin:4px 0 6px}
+.keyrow i{display:inline-block;width:12px;height:3px;border-radius:2px;margin-right:5px;vertical-align:3px}
+.keyrow i.sq{height:10px;vertical-align:-1px}
+#tip{position:fixed;pointer-events:none;background:var(--surface);border:1px solid var(--rule);border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.14);padding:6px 9px;font-size:12.5px;z-index:2000;display:none;max-width:280px}
+.agents{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.agent{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);padding:12px 14px;font-size:13.5px}
+.agent b{display:block;font-size:14.5px;margin-bottom:3px}
+.agent .ico{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.pill{display:inline-block;font-size:11.5px;padding:1px 7px;border-radius:10px;background:var(--rule);color:var(--ink2);margin-left:4px}
+.range{position:relative;height:14px;margin:2px 0}
+.range .ln{position:absolute;top:6px;height:2px;background:var(--base)}
+.range .md{position:absolute;top:2px;width:2px;height:10px;background:var(--ink)}
+.fam{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.fam .card h4{margin:0 0 4px;font-size:15px}
+footer{max-width:1280px;margin:0 auto;padding:18px 16px 40px;font-size:12.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="top"><div class="in">
+  <div class="brand">Kiira EV Last Mile <small>Futures lab · agent-based model</small></div>
+  <nav>
+    <a href="#how">Agents</a><a href="#map-s">Best three</a><a href="#families">Families</a><a href="#jobs">Jobs</a><a href="#routes">Routes</a><a href="#ev">Electric 14-seater</a><a href="#agg">Aggregator</a><a href="#rollout">Roll-out</a><a href="#method">Method</a><a href="../">← Main Kiira page</a>
+  </nav>
+</div></div>
+<main>
+<section id="hero">
+  <h1>What happens when thousands of people, operators, boda riders and shops each make their own choice?</h1>
+  <p class="lede">This lab rebuilds the Kiira model as an agent-based model. Households pick how to travel each week, operators learn fares and fleet sizes, boda riders cut prices or leave, and shops decide whether to join a delivery aggregator. The model runs every option for all 100 suburbs over many uncertain futures, then ranks the best three options for each area by what you care about.</p>
+  <div class="tiles" id="heroTiles"></div>
+  <p class="note" id="heroNote"></p>
+</section>
+
+<section id="how">
+  <h2>The agents</h2>
+  <p class="sub">Nothing below is fixed in advance. Ridership, fares, fleet size, boda earnings and orders come out of the agents' choices, week by week, over two years. The network model on the main page finds the best fares in one step. Here people and firms learn, copy each other and react.</p>
+  <div class="agents">
+    <div class="agent"><span class="ico">Households</span><b>90 sample families per suburb</b>Income from Meta's wealth index, a distance to the nearest stop, their own value of time and their own trust in new things. Each week they choose walk, boda or feeder for a peak trip and an off-peak trip. They hear about the feeder from adverts and neighbours, remember crowding and being left at the stop, and tend to stick with what they used last week.</div>
+    <div class="agent"><span class="ico">Operator</span><b>One per suburb</b>Launches with 85% of its planned fleet. Each month it nudges fares up or down in each time period and keeps changes that helped. It orders vehicles when buses are full or riders are refused (8-week delivery) and releases them when buses run empty.</div>
+    <div class="agent"><span class="ico">Boda riders</span><b>A pool per suburb</b>Their daily earnings follow the trips left to them. When pay falls below what they could earn elsewhere, they cut fares and some leave. Leavers fill shuttle-driver and courier jobs first.</div>
+    <div class="agent"><span class="ico">Shops and buyers</span><b>Local delivery aggregator</b>Shops join when expected orders beat the commission. Households start ordering once enough nearby shops are listed. Feeders carry parcels in off-peak hours and couriers walk or e-bike the last few hundred metres.</div>
+    <div class="agent"><span class="ico">Kiira plant</span><b>Supplier</b>Electric fleets wait in a queue for plant output (40% of 2,500 a year at first). Diesel taxis are imported, so they can start at once.</div>
+  </div>
+</section>
+
+<section id="lab">
+  <h2>Set the priorities and the futures</h2>
+  <p class="sub">The first five sliders weight what "best" means, and the map re-ranks at once. The other sliders change the world the agents live in. Press <b>Re-run the agents</b> to simulate all 100 suburbs again in your browser. Every slider is drawn from its range in each future, so the model reports a spread, not one number.</p>
+  <h3>What matters most</h3>
+  <div class="controls" id="wCtl"></div>
+  <h3>The world the agents live in <span class="note">(centre of each uncertain range)</span></h3>
+  <div class="controls" id="pCtl"></div>
+  <div class="runbar">
+    <label class="note">Futures per option <select id="reps"><option>4</option><option selected>6</option><option>12</option></select></label>
+    <button class="primary" id="runBtn">Re-run the agents</button><button id="stopBtn" disabled>Stop</button><button id="resetBtn">Reset</button>
+    <div class="prog"><i id="progI"></i></div><span class="note" id="progT">Showing pre-computed results: 12 futures per option at the central settings.</span>
+  </div>
+</section>
+
+<section id="map-s">
+  <h2>Best three options for each suburb</h2>
+  <p class="sub">Hover over a suburb to see its best three options. Click it for the full picture and to watch its two years unfold. There are up to 18 options per suburb: three vehicles (Kiira 14-seat e-shuttle, Kayoola 8 m e-midi where roads allow, a diesel 14-seat taxi for comparison), three ways to set fares (flat UGX 1,000, learning dynamic, inclusive with a city transfer discount and a 20% green grant), each with or without the aggregator.</p>
+  <div class="mapbar">
+    <label>Colour suburbs by <select id="layer">
+      <option value="best">Best option</option><option value="welfare">Gain per household (UGX/month)</option><option value="jobs">Net jobs</option><option value="npv">Operator NPV, best option (USD m)</option><option value="pev">Chance e-shuttle beats diesel</option><option value="boda">Boda rider earnings change</option><option value="riders">Riders per day</option>
+    </select></label>
+    <label>Base <select id="base"><option value="grey">Grey canvas</option><option value="sat">Satellite</option></select></label>
+    <label><input type="checkbox" id="showRoutes" checked> Feeder routes</label>
+  </div>
+  <div class="mapwrap"><div id="map" class="map"></div><div id="panel"><h3>Pick a suburb</h3><p class="note">Hover for the best three; click for detail, the week-by-week film and every option with its spread across futures.</p><div id="mixBox"></div></div></div>
+</section>
+
+<section id="families">
+  <h2>How families are affected</h2>
+  <p class="sub">The gain per household combines money and time: shorter walks, less waiting, cheaper trips than a boda and fewer shopping trips, minus fares that replace walking. It is the standard "logsum" measure from the choice model, counted in shillings a month. Bodas lose trips, so their riders' families are shown separately.</p>
+  <div class="tiles" id="famTiles"></div>
+  <div class="grid2">
+    <div class="card"><h3 style="margin-top:0">Who uses the feeder, by family income</h3><div class="keyrow" id="useKey"></div><svg class="chart" id="useChart" viewBox="0 0 560 250"></svg><p class="note">Share of trips heading towards the hub that are made by feeder, for the poorest and richest thirds of sample families, under each suburb's best option (median of futures).</p></div>
+    <div class="card"><h3 style="margin-top:0">Gain per household by segment</h3><svg class="chart" id="segChart" viewBox="0 0 560 250"></svg><p class="note">UGX per household per month. Each dot is a suburb (best option, median future, coloured by option); the line spans the 10th to 90th percentile of futures for that suburb.</p></div>
+  </div>
+  <h3>Four families</h3>
+  <div class="fam" id="famCards"></div>
+</section>
+
+<section id="jobs">
+  <h2>Employment</h2>
+  <p class="sub">Jobs created by driving, depots and charging, plant assembly, couriers and shop sales, minus boda riders who leave the trade. Kiira-built vehicles add plant jobs that imported diesel taxis do not.</p>
+  <div class="keyrow" id="jobKey"></div>
+  <svg class="chart" id="jobChart" viewBox="0 0 1000 260"></svg>
+  <div class="tiles" id="jobTiles" style="margin-top:12px"></div>
+</section>
+
+<section id="routes">
+  <h2>Routes</h2>
+  <p class="sub">Each feeder runs from inside the suburb to its nearest trunk hub. The map's feeder lines are drawn thicker where more people ride. The table lists every route under its best option.</p>
+  <div class="tablewrap"><table id="routeTable"></table></div>
+</section>
+
+<section id="ev">
+  <h2>The case for the electric 14-seater</h2>
+  <p class="sub">The same families, the same fares and the same futures, with only the vehicle changed. The e-shuttle costs more to buy but far less to run: power at UGX ~450/kWh on the off-peak tariff against diesel at about UGX 5,000/L. Every future draws diesel prices, Kiira prices and electricity prices from wide ranges.</p>
+  <div class="tiles" id="evTiles"></div>
+  <div class="grid2">
+    <div class="card"><h3 style="margin-top:0">E-shuttle NPV minus diesel taxi NPV, every suburb and future</h3><svg class="chart" id="evHist" viewBox="0 0 560 260"></svg><p class="note">Learning-dynamic fares, with the aggregator. Bars to the right of zero are futures where the e-shuttle earns more over 10 years.</p></div>
+    <div class="card"><h3 style="margin-top:0">Cost per ride by vehicle</h3><div class="keyrow" id="cprKey"></div><svg class="chart" id="cprChart" viewBox="0 0 560 260"></svg><p class="note">Running costs plus annualised vehicles and chargers, per ride. Median across suburbs; the band spans the 10th to 90th percentile of futures.</p></div>
+  </div>
+</section>
+
+<section id="agg">
+  <h2>A local delivery aggregator</h2>
+  <p class="sub">Nearby shops list their goods on one app. Orders go into totes that ride the feeder in quiet hours, and couriers on foot or e-bike carry them the last few hundred metres. Families save a shopping trip, shops gain sales, couriers gain work, and the operator fills empty seats.</p>
+  <svg class="chart" id="aggFlow" viewBox="0 0 1000 120" style="max-width:1000px"></svg>
+  <div class="tiles" id="aggTiles" style="margin-top:12px"></div>
+  <p class="note">The aggregator raises welfare and jobs in almost every suburb, so it is in nearly every best option. With a low commission or few orders, the platform's own fixed costs can exceed its fees in small suburbs (try the commission slider and re-run). Some sales move from other shops, so shop jobs are counted net of that.</p>
+</section>
+
+<section id="rollout">
+  <h2>Roll-out, week by week</h2>
+  <p class="sub">All 100 suburbs together, with electric fleets queued for Kiira's output. Press play to watch riders grow as word spreads, operators add vehicles and the aggregator catches on.</p>
+  <div class="mapbar">
+    <label>Network <select id="netSel"><option value="best">Best option in each suburb</option><option value="e14">All e-shuttles (learning fares + aggregator)</option><option value="ice14">All diesel taxis (learning fares + aggregator)</option></select></label>
+    <button id="play">▶ Play</button>
+    <input type="range" id="wk" min="0" max="100" value="100" style="flex:1;min-width:200px;accent-color:var(--blue)">
+    <output id="wkO" style="font-weight:700;min-width:120px"></output>
+  </div>
+  <div class="mapwrap"><div id="map2" class="map" style="height:min(60vh,560px)"></div>
+    <div class="card"><div class="tiles" id="rollTiles" style="grid-template-columns:1fr 1fr"></div><div class="keyrow" id="rollKey"></div><svg class="chart" id="rollChart" viewBox="0 0 360 200"></svg></div></div>
+</section>
+
+<section id="method">
+  <h2>Method and uncertainty</h2>
+  <div class="grid2">
+    <div>
+      <p>Each of the 100 suburbs is simulated for 104 weeks with 90 sample households. Each household stands for a few hundred real ones. Trips, costs, walking, waiting, boda fares and the logit choice use the same formulas and inputs as the network model on the main page. With the same fare and fleet, the two models agree on daily riders to within about 5%.</p>
+      <p><b>What the agents add.</b> Awareness spreads by Bass diffusion (adverts plus word of mouth). Habit is a bonus in shillings for last week's mode. Refusals at full buses add remembered waiting time. Operators learn fares by trial and error each month and adjust fleets with a delivery lag. Boda riders' pay responds to lost trips, leading to price cuts and exits. Shop and household adoption of the aggregator feed each other, and plant output is shared across suburbs.</p>
+      <p><b>Uncertainty.</b> Each future draws all twelve uncertain inputs (table) at once. Every option in a suburb faces the same futures and the same families, so differences between options come from the policy, not from luck. Results show the median and the 10th to 90th percentile.</p>
+      <p><b>Scoring.</b> For each suburb, every option's median family gain, net jobs, money (operator NPV plus platform profit minus city subsidy over 10 years), robustness (the same at the 10th percentile) and CO₂ saved are scaled from 0 to 1 against the other options there. The weighted average ranks them.</p>
+      <p><b>Limits.</b> All inputs are planning assumptions. Replace them with household surveys, operator data and Kiira Motors costs. The 14-seat e-shuttle is a product concept, not a current Kiira model. Trunk buses, taxis' own response and land use are not agents here.</p>
+      <p class="note">Model code: <a href="kiira_abm.js">kiira_abm.js</a> (runs in Node and in this page) · Data: <a href="futures_data.js">futures_data.js</a> · Built by Gava Charles.</p>
+    </div>
+    <div class="tablewrap" style="max-height:none"><table id="uncTable"></table></div>
+  </div>
+</section>
+</main>
+<footer>Kiira EV Last Mile · Futures lab (agent-based model) · Gava Charles, 2026 · Basemaps: Esri, Maxar, Earthstar Geographics · Suburbs and wealth: OSM, WorldPop, Meta RWI · All values are planning estimates.</footer>
+<div id="tip"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="../data.js"></script>
+<script src="futures_data.js"></script>
+<script src="../kiira_model.js"></script>
+<script src="kiira_abm.js"></script>
+<script>
+"use strict";
+const K = window.KIIRA, AB = window.ABM, A = window.KiiraABM;
+const SUBS = K.inputs.slice().sort((a, b) => a.sid - b.sid);
+const BY = Object.fromEntries(SUBS.map((s) => [s.sid, s]));
+const FX = A.DEFAULTS.fx;
+let GRID = AB.grid, NETS = AB.nets, params = {};
+const W = Object.assign({}, AB.weights);
+const $ = (id) => document.getElementById(id);
+const nf = (v, d = 0) => (v == null || !isFinite(v) ? "–" : v.toLocaleString("en-GB", { maximumFractionDigits: d, minimumFractionDigits: d }));
+const ugx = (v) => "UGX " + nf(Math.round(v / 100) * 100);
+const usdm = (v, d = 1) => (v < 0 ? "−" : "") + "$" + nf(Math.abs(v), d) + "m";
+const sum = (a) => a.reduce((x, y) => x + y, 0);
+const med = (a) => A.quantile(a, 0.5);
+const tip = $("tip");
+function showTip(e, html) { tip.innerHTML = html; tip.style.display = "block"; const x = Math.min(e.clientX + 14, innerWidth - 290); tip.style.left = x + "px"; tip.style.top = e.clientY + 14 + "px"; }
+function hideTip() { tip.style.display = "none"; }
+
+// Option colour follows the vehicle and fare rule, never its rank.
+const FAM = [
+  { key: "e14|flat", label: "E-shuttle 14 · flat fare", c: "#2a78d6" },
+  { key: "e14|learn", label: "E-shuttle 14 · learning dynamic", c: "#1baf7a" },
+  { key: "e14|inclusive", label: "E-shuttle 14 · inclusive", c: "#eb6834" },
+  { key: "midi", label: "E-midi 8 m (any fare rule)", c: "#6250d6" },
+  { key: "ice14", label: "Diesel taxi 14 (any fare rule)", c: "#898781" },
+];
+const famOf = (id) => { const [v, p] = id.split("|"); return FAM.find((f) => f.key === (v === "e14" ? v + "|" + p : v)); };
+const label = (id) => { const [v, p, g] = id.split("|"); return A.optLabel({ vehicle: v, pricing: p, agg: g === "1" }); };
+const ranked = (sid) => A.score(GRID[sid], W);
+const bestId = (sid) => ranked(sid)[0].id;
+const bestSt = (sid) => GRID[sid][bestId(sid)];
+
+/* ---------- Controls ---------- */
+const WCTL = [["families", "Families' gain"], ["jobs", "Net jobs"], ["money", "Money (operator, platform, city)"], ["robust", "Robust in bad futures"], ["climate", "CO₂ saved"]];
+WCTL.forEach(([k, l]) => {
+  const d = document.createElement("div"); d.className = "ctl";
+  d.innerHTML = `<div class="row"><span>${l}</span><output id="wo_${k}">${W[k]}</output></div><input type="range" min="0" max="5" step="1" value="${W[k]}" id="w_${k}" aria-label="${l} weight">`;
+  $("wCtl").appendChild(d);
+  d.querySelector("input").addEventListener("input", (e) => { W[k] = +e.target.value; $("wo_" + k).textContent = W[k]; refresh(); });
+});
+// World sliders shift the centre of each uncertain range (the range keeps its width).
+const PCTL = [
+  ["demandMult", "Demand level", 0.5, 1.5, 0.05, (v) => "×" + v.toFixed(2)],
+  ["diesel", "Diesel price (UGX/L)", 3500, 7500, 100, (v) => nf(v)],
+  ["capexMult", "Kiira vehicle prices", 0.7, 1.6, 0.05, (v) => "×" + v.toFixed(2)],
+  ["tariffMult", "Electricity price", 0.7, 1.6, 0.05, (v) => "×" + v.toFixed(2)],
+  ["bassQ", "Word of mouth", 0.1, 0.9, 0.05, (v) => v.toFixed(2)],
+  ["bodaReserve", "Boda riders' fallback pay (UGX/day)", 12000, 36000, 1000, (v) => nf(v)],
+  ["driverMonthly", "Driver pay (UGX/month)", 450000, 1200000, 25000, (v) => nf(v)],
+  ["commission", "Aggregator commission", 0.03, 0.15, 0.01, (v) => Math.round(v * 100) + "%"],
+  ["deliveryFee", "Delivery fee (UGX)", 300, 2000, 100, (v) => nf(v)],
+];
+const center = (k) => { const u = A.UNCERTAIN.find((x) => x.key === k); return u ? (u.lo + u.hi) / 2 : A.DEFAULTS[k]; };
+PCTL.forEach(([k, l, lo, hi, st, fm]) => {
+  const v0 = center(k);
+  const d = document.createElement("div"); d.className = "ctl";
+  d.innerHTML = `<div class="row"><span>${l}</span><output id="po_${k}">${fm(v0)}</output></div><input type="range" min="${lo}" max="${hi}" step="${st}" value="${v0}" id="p_${k}" aria-label="${l}">`;
+  $("pCtl").appendChild(d);
+  d.querySelector("input").addEventListener("input", (e) => { $("po_" + k).textContent = fm(+e.target.value); $("progT").textContent = "Settings changed: press Re-run the agents."; });
+});
+function readParams() {
+  const p = {}, unc = [];
+  PCTL.forEach(([k]) => { const v = +$("p_" + k).value; const u = A.UNCERTAIN.find((x) => x.key === k); if (u) { const h = (u.hi - u.lo) / 2; unc.push(Object.assign({}, u, { lo: Math.max(0, v - h), hi: v + h })); } else p[k] = v; });
+  return { p, unc };
+}
+
+/* ---------- Worker: live re-runs ---------- */
+// Suburbs are split across several workers (one per spare CPU core), then one worker builds the network roll-out.
+let workers = [];
+function killWorkers() { workers.forEach((w) => w.terminate()); workers = []; }
+function startRun() {
+  const { p, unc } = readParams();
+  killWorkers();
+  const reps = +$("reps").value, params = Object.assign({}, p, { __unc: unc });
+  const k = Math.max(1, Math.min(6, (navigator.hardwareConcurrency || 4) - 1));
+  $("runBtn").disabled = true; $("stopBtn").disabled = false;
+  let done = 0, chunks = 0; const t0 = performance.now();
+  for (let j = 0; j < k; j++) {
+    const w = new Worker("abm_worker.js"); workers.push(w);
+    w.onmessage = (e) => {
+      const m = e.data;
+      if (m.type === "suburb") {
+        done++; GRID = Object.assign({}, GRID, { [m.sid]: m.stats });
+        $("progI").style.width = (100 * done / SUBS.length) + "%";
+        const left = ((performance.now() - t0) / done) * (SUBS.length - done) / 1000;
+        $("progT").textContent = `Simulated ${done} of ${SUBS.length} suburbs on ${k} cores (${reps} futures × every option)… about ${Math.ceil(left)} s left`;
+        styleSuburb(m.sid);
+        if (done % 10 === 0) refresh(true);
+      }
+      if (m.type === "chunkDone" && ++chunks === k) {
+        const choice = Object.fromEntries(SUBS.map((s) => [s.sid, bestId(s.sid)]));
+        $("progT").textContent = "Building the network roll-out…";
+        workers[0].postMessage({ type: "net", subs: SUBS, params, choice });
+      }
+      if (m.type === "network") {
+        NETS = Object.assign({}, NETS, { best: m.net });
+        $("progT").textContent = `Done: all 100 suburbs re-simulated with your settings (${reps} futures per option, ${((performance.now() - t0) / 1000).toFixed(0)} s).`;
+        $("runBtn").disabled = false; $("stopBtn").disabled = true; killWorkers(); refresh(); setNet();
+      }
+    };
+    w.postMessage({ type: "grid", subs: SUBS.filter((_, i) => i % k === j), params, reps, weights: W });
+  }
+}
+$("runBtn").onclick = startRun;
+$("stopBtn").onclick = () => { killWorkers(); $("runBtn").disabled = false; $("stopBtn").disabled = true; $("progT").textContent = "Stopped: suburbs not yet re-run keep their earlier results."; refresh(); };
+$("resetBtn").onclick = () => { killWorkers(); GRID = AB.grid; NETS = AB.nets; PCTL.forEach(([k, , , , , fm]) => { $("p_" + k).value = center(k); $("po_" + k).textContent = fm(center(k)); }); Object.assign(W, AB.weights); WCTL.forEach(([k]) => { $("w_" + k).value = W[k]; $("wo_" + k).textContent = W[k]; }); $("progI").style.width = "0"; $("progT").textContent = "Showing pre-computed results: 12 futures per option at the central settings."; $("runBtn").disabled = false; $("stopBtn").disabled = true; refresh(); setNet(); };
+
+/* ---------- Main map ---------- */
+const tiles = {
+  grey: () => L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", { maxZoom: 16, attribution: "Esri" }),
+  sat: () => L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 18, attribution: "Esri, Maxar, Earthstar Geographics" }),
+};
+const map = L.map("map", { zoomSnap: 0.25 });
+let baseL = tiles.grey().addTo(map);
+$("base").onchange = (e) => { map.removeLayer(baseL); baseL = tiles[e.target.value]().addTo(map); baseL.bringToBack(); };
+const polyBy = {};
+const subL = L.geoJSON(K.geo.suburbs, {
+  style: () => ({ weight: 0.8, color: "#ffffff", fillOpacity: 0.8 }),
+  onEachFeature: (f, l) => {
+    polyBy[f.properties.sid] = l;
+    l.bindTooltip(() => tipHtml(f.properties.sid), { className: "tt", sticky: true, direction: "auto" });
+    l.on("click", () => openSuburb(f.properties.sid));
+    l.on("mouseover", () => l.setStyle({ weight: 2.2, color: "#0b0b0b" }));
+    l.on("mouseout", () => l.setStyle({ weight: 0.8, color: "#ffffff" }));
+  },
+}).addTo(map);
+map.fitBounds(subL.getBounds(), { padding: [10, 10] });
+const routeBy = {};
+const routeL = L.geoJSON(K.geo.feeders, { style: () => ({ color: "#0b0b0b", weight: 1.5, opacity: 0.75 }), onEachFeature: (f, l) => { routeBy[f.properties.sid] = l; l.bindTooltip(() => routeTip(f.properties.sid), { className: "tt", sticky: true }); } }).addTo(map);
+$("showRoutes").onchange = (e) => (e.target.checked ? routeL.addTo(map) : map.removeLayer(routeL));
+const legend = L.control({ position: "bottomleft" });
+legend.onAdd = () => { const d = L.DomUtil.create("div", "legend"); d.id = "legend"; return d; };
+legend.addTo(map);
+
+// Sequential ramps (one hue light to dark) and a diverging ramp with a grey middle.
+const SEQ = ["#dceafb", "#b4d2f6", "#7fb0ee", "#4b8de0", "#2a6fc4", "#1b4f92"];
+const DIV = ["#b5332f", "#e07a6d", "#f0c1b8", "#e6e5df", "#a9d7c2", "#4fb58d", "#137a52"];
+function binner(vals, ramp) { const v = vals.filter(isFinite).sort((a, b) => a - b); const qs = ramp.slice(1).map((_, i) => A.quantile(v, (i + 1) / ramp.length)); return { f: (x) => ramp[qs.filter((q) => x > q).length], qs }; }
+function layerVal(sid, key) {
+  const st = bestSt(sid);
+  switch (key) {
+    case "welfare": return st.welfare[1];
+    case "jobs": return st.jobsNet[1];
+    case "npv": return st.npv[1];
+    case "pev": return pEV(sid);
+    case "boda": return st.bodaEarn[1];
+    case "riders": return st.riders[1];
+  }
+}
+function pEV(sid) { const g = GRID[sid], e = g["e14|learn|1"].npvRuns, d = g["ice14|learn|1"].npvRuns; return e.filter((v, i) => v > d[i]).length / e.length; }
+let colorFn = null;
+function styleSuburb(sid) { const l = polyBy[sid]; if (l && colorFn) l.setStyle({ fillColor: colorFn(sid) }); }
+function restyle() {
+  const key = $("layer").value; let html = "";
+  if (key === "best") {
+    colorFn = (sid) => famOf(bestId(sid)).c;
+    const cnt = {}; SUBS.forEach((s) => { const f = famOf(bestId(s.sid)).key; cnt[f] = (cnt[f] || 0) + 1; });
+    html = "<b>Best option</b>" + FAM.map((f) => `<div><i style="background:${f.c}"></i>${f.label} <span class="note">${cnt[f.key] || 0}</span></div>`).join("");
+  } else if (key === "pev") {
+    const ramp = SEQ;
+    colorFn = (sid) => ramp[Math.min(5, Math.floor(Math.max(0, pEV(sid) - 0.5) / 0.5 * 6))];
+    html = "<b>Chance the e-shuttle beats diesel</b>" + ["50–58%", "58–67%", "67–75%", "75–83%", "83–92%", "92–100%"].map((t, i) => `<div><i style="background:${ramp[i]}"></i>${t}</div>`).join("");
+  } else if (key === "boda") {
+    const vals = SUBS.map((s) => layerVal(s.sid, key)); const lo = Math.min(...vals);
+    const br = [lo, lo * 0.66, lo * 0.33, -1];
+    colorFn = (sid) => { const v = layerVal(sid, key); return v >= 0 ? DIV[3] : DIV[Math.min(2, br.filter((b) => v > b).length - 1)] || DIV[0]; };
+    html = `<b>Boda rider earnings change (UGX/month)</b><div><i style="background:${DIV[0]}"></i>below ${nf(br[1], 0)}</div><div><i style="background:${DIV[1]}"></i>${nf(br[1])} to ${nf(br[2])}</div><div><i style="background:${DIV[2]}"></i>${nf(br[2])} to 0</div><div><i style="background:${DIV[3]}"></i>no loss</div>`;
+  } else {
+    const vals = SUBS.map((s) => layerVal(s.sid, key)); const b = binner(vals, SEQ);
+    colorFn = (sid) => b.f(layerVal(sid, key));
+    const fm = key === "npv" ? (v) => usdm(v, 1) : (v) => nf(v);
+    const names = { welfare: "Gain per household (UGX/month)", jobs: "Net jobs", npv: "Operator NPV (USD m)", riders: "Riders per day" };
+    html = `<b>${names[key]}</b>` + SEQ.map((c, i) => `<div><i style="background:${c}"></i>${i === 0 ? "up to " + fm(b.qs[0]) : i === SEQ.length - 1 ? "over " + fm(b.qs[i - 1]) : fm(b.qs[i - 1]) + " – " + fm(b.qs[i])}</div>`).join("");
+  }
+  SUBS.forEach((s) => styleSuburb(s.sid));
+  $("legend").innerHTML = html + '<div class="note" style="margin-top:4px">Gava Charles · agent-based model</div>';
+  // Routes: width by riders on the best option
+  const mx = Math.max(...SUBS.map((s) => bestSt(s.sid).riders[1]));
+  SUBS.forEach((s) => { const l = routeBy[s.sid]; if (l) l.setStyle({ weight: 1 + 6 * Math.sqrt(bestSt(s.sid).riders[1] / mx) }); });
+}
+$("layer").onchange = restyle;
+
+function top3Html(sid) {
+  const r = ranked(sid).slice(0, 3);
+  return '<ol class="top3">' + r.map((x) => `<li><span class="sw" style="background:${famOf(x.id).c}"></span><span>${label(x.id)}</span><span class="num">${Math.round(x.score * 100)}</span></li>`).join("") + "</ol>";
+}
+function tipHtml(sid) {
+  const s = BY[sid], st = bestSt(sid);
+  return `<b>${s.name}</b> <span class="note">${s.segment} · ${nf(s.pop / 1000, 0)}k people</span>${top3Html(sid)}
+  <div class="note" style="margin-top:6px">Best option, median future: ${nf(st.riders[1])} riders/day · families +${ugx(st.welfare[1])}/month · ${nf(st.jobsNet[1])} net jobs · NPV ${usdm(st.npv[1], 2)}</div><div class="note">Score out of 100 under your weights. Click for detail.</div>`;
+}
+function routeTip(sid) { const s = BY[sid], st = bestSt(sid); return `<b>${s.name} → ${s.hub}</b><br>${nf(s.route_km, 1)} km · ${nf(st.riders[1])} riders/day · ${nf(st.fleet[1])} vehicles · peak load ${Math.round(st.peakLoad[1] * 100)}%`; }
+
+/* ---------- Suburb panel ---------- */
+let curSid = null;
+function rangeBar(lo, md, hi, mn, mx) { const sc = (v) => ((v - mn) / (mx - mn || 1)) * 100; return `<div class="range"><div class="ln" style="left:${sc(lo)}%;width:${Math.max(1, sc(hi) - sc(lo))}%"></div><div class="md" style="left:${sc(md)}%"></div></div>`; }
+function openSuburb(sid) {
+  curSid = sid;
+  history.replaceState(null, "", "#s=" + sid);
+  const s = BY[sid], r = ranked(sid), st = GRID[sid][r[0].id];
+  const npvs = r.map((x) => GRID[sid][x.id].npv); const mn = Math.min(...npvs.map((v) => v[0])), mx = Math.max(...npvs.map((v) => v[2]));
+  $("panel").innerHTML = `<h3>${s.name}</h3><p class="note">${s.segment}, ${s.district} · ${nf(s.pop)} people · ${Math.round(s.gap_share * 100)}% live over 500 m from a main road · feeder ${nf(s.route_km, 1)} km to ${s.hub}</p>
+  <h3 style="font-size:15px;margin:10px 0 2px">Best three under your weights</h3>${top3Html(sid)}
+  <dl class="kv" style="margin-top:10px">
+   <dt>Riders per day</dt><dd>${nf(st.riders[1])} <span class="note">(${nf(st.riders[0])}–${nf(st.riders[2])})</span></dd>
+   <dt>Average fare</dt><dd>${ugx(st.fare[1])}</dd>
+   <dt>Fares by period</dt><dd>${st.fares.map((f) => nf(f)).join(" · ")}</dd>
+   <dt>Vehicles</dt><dd>${nf(st.fleet[1])}</dd>
+   <dt>Gain per household</dt><dd>${ugx(st.welfare[1])}/month</dd>
+   <dt>Net jobs</dt><dd>${nf(st.jobsNet[1])} <span class="note">(${nf(st.drivers[1])} drivers, ${nf(st.couriers[1])} couriers, −${nf(st.bodaLost[1])} boda)</span></dd>
+   <dt>Boda earnings</dt><dd>${ugx(st.bodaEarn[1])}/month per rider</dd>
+   <dt>Operator NPV</dt><dd>${usdm(st.npv[1], 2)} <span class="note">(${usdm(st.npv[0], 2)} to ${usdm(st.npv[2], 2)})</span></dd>
+   <dt>Profitable in</dt><dd>${Math.round(st.pProfit * 100)}% of futures</dd>
+   <dt>Orders per day</dt><dd>${nf(st.orders[1])} from ${nf(st.shopsOn[1])} shops</dd>
+   <dt>CO₂ saved</dt><dd>${nf(st.co2[1])} t/yr</dd>
+   <dt>E-shuttle beats diesel</dt><dd>${Math.round(pEV(sid) * 100)}% of futures</dd>
+  </dl>
+  <h3 style="font-size:15px;margin:14px 0 2px">Watch two years unfold <span class="pill">live</span></h3>
+  <div class="keyrow"><span><i style="background:var(--blue)"></i>riders/day</span><span><i style="background:var(--orange)"></i>boda riders ×100</span><span><i style="background:var(--aqua)"></i>orders/day</span></div>
+  <svg class="chart" id="oneChart" viewBox="0 0 330 170"></svg><p class="note" id="oneNote">Running the agents…</p>
+  <h3 style="font-size:15px;margin:14px 0 4px">Every option: operator NPV, 10th–90th percentile</h3>
+  <table><tr><th>Option</th><th>Score</th><th style="width:40%">NPV</th></tr>${r.map((x) => { const v = GRID[sid][x.id].npv; return `<tr><td style="white-space:normal"><span class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${famOf(x.id).c};margin-right:4px"></span>${label(x.id)}</td><td>${Math.round(x.score * 100)}</td><td title="${usdm(v[0], 2)} / ${usdm(v[1], 2)} / ${usdm(v[2], 2)}">${rangeBar(v[0], v[1], v[2], mn, mx)}</td></tr>`; }).join("")}</table>
+  <p class="note">Range axis ${usdm(mn, 2)} to ${usdm(mx, 2)}.</p>`;
+  runOne(sid, r[0].id);
+}
+let oneW = null;
+function runOne(sid, id) {
+  if (oneW) oneW.terminate();
+  oneW = new Worker("abm_worker.js");
+  const { p, unc } = readParams();
+  unc.forEach((u) => (p[u.key] = (u.lo + u.hi) / 2));
+  oneW.onmessage = (e) => { if (e.data.sid !== curSid) return; drawOne(e.data.weekly); $("oneNote").textContent = `${label(id)}, one future at your settings. The agents re-run in your browser each time you open a suburb.`; };
+  oneW.postMessage({ type: "one", sub: BY[sid], id, params: p, seed: 5 });
+}
+function drawOne(wk) {
+  const svg = $("oneChart"), w = 330, h = 170, m = { l: 34, r: 8, t: 8, b: 22 };
+  const ser = [["served", 1, "var(--blue)", "riders/day"], ["boda", 100, "var(--orange)", "boda riders"], ["orders", 1, "var(--aqua)", "orders/day"]];
+  const mx = Math.max(1, ...wk.map((d) => Math.max(d.served, d.boda * 100, d.orders)));
+  const x = (i) => m.l + (i / (wk.length - 1)) * (w - m.l - m.r), y = (v) => h - m.b - (v / mx) * (h - m.t - m.b);
+  let g = `<line class="ax" x1="${m.l}" x2="${w - m.r}" y1="${h - m.b}" y2="${h - m.b}"/><text x="${m.l}" y="${h - 6}">week 0</text><text x="${w - m.r}" y="${h - 6}" text-anchor="end">week ${wk.length}</text><text x="${m.l - 4}" y="${m.t + 8}" text-anchor="end">${nf(mx / 1000, 0)}k</text><text x="${m.l - 4}" y="${h - m.b}" text-anchor="end">0</text>`;
+  ser.forEach(([k, f, c]) => { g += `<path d="${wk.map((d, i) => (i ? "L" : "M") + x(i).toFixed(1) + "," + y(d[k] * f).toFixed(1)).join("")}" fill="none" stroke="${c}" stroke-width="2"/>`; });
+  g += `<line id="oneX" class="ax" y1="${m.t}" y2="${h - m.b}" style="display:none"/><rect x="${m.l}" y="${m.t}" width="${w - m.l - m.r}" height="${h - m.t - m.b}" fill="transparent" id="oneHit"/>`;
+  svg.innerHTML = g;
+  $("oneHit").addEventListener("mousemove", (e) => { const b = svg.getBoundingClientRect(); const i = Math.max(0, Math.min(wk.length - 1, Math.round(((e.clientX - b.left) / b.width * w - m.l) / (w - m.l - m.r) * (wk.length - 1)))); const d = wk[i]; const X = $("oneX"); X.style.display = ""; X.setAttribute("x1", x(i)); X.setAttribute("x2", x(i)); showTip(e, `<b>Week ${d.wk + 1}</b><br>${nf(d.served)} riders/day · fare ${ugx(d.fare)}<br>${nf(d.N)} vehicles in service · ${Math.round(d.aware * 100)}% have heard of it<br>${nf(d.boda)} boda riders · ${nf(d.orders)} orders/day`); });
+  $("oneHit").addEventListener("mouseleave", () => { hideTip(); $("oneX").style.display = "none"; });
+}
+
+/* ---------- Network summary ---------- */
+function mix() {
+  const ids = SUBS.map((s) => bestId(s.sid)), st = SUBS.map((s) => bestSt(s.sid));
+  const hh = SUBS.map((s) => s.pop / A.DEFAULTS.hhSize);
+  return {
+    ids, st, riders: sum(st.map((x) => x.riders[1])), fleet: sum(st.map((x) => x.fleet[1])), jobs: sum(st.map((x) => x.jobsNet[1])),
+    welfare: sum(st.map((x, i) => x.welfare[1] * hh[i])) / sum(hh), npv: sum(st.map((x) => x.npv[1])), city: sum(st.map((x) => x.city[1])),
+    orders: sum(st.map((x) => x.orders[1])), co2: sum(st.map((x) => x.co2[1])), famYr: sum(st.map((x, i) => x.welfare[1] * hh[i])) * 12 / FX / 1e6,
+    pev: sum(SUBS.map((s) => pEV(s.sid))) / SUBS.length, profitShare: sum(st.map((x) => x.pProfit)) / st.length,
+  };
+}
+function tile(k, v, d) { return `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d || ""}</div></div>`; }
+function heroTiles() {
+  const M = mix();
+  $("heroTiles").innerHTML = tile("Riders per day", nf(M.riders), "best option in each suburb, median future") + tile("Family gain", ugx(M.welfare), "per household per month in served suburbs")
+    + tile("Value to families", usdm(M.famYr, 0) + "/yr", "money and time, all 100 suburbs") + tile("Net new jobs", nf(M.jobs), "after boda riders who leave")
+    + tile("E-shuttle beats diesel", Math.round(M.pev * 100) + "%", "of suburb-futures, same fares and families") + tile("Orders per day", nf(M.orders), "through the local aggregator")
+    + tile("Operator NPV", usdm(M.npv, 0), `city subsidy ${usdm(M.city, 1)}/yr`);
+  const cnt = {}; M.ids.forEach((id) => { const f = famOf(id).label; cnt[f] = (cnt[f] || 0) + 1; });
+  $("heroNote").textContent = "Best options under the current weights: " + Object.entries(cnt).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} in ${v}`).join("; ") + ".";
+  $("mixBox").innerHTML = `<h3 style="font-size:15px;margin-top:14px">The best-option mix</h3><dl class="kv"><dt>Riders/day</dt><dd>${nf(M.riders)}</dd><dt>Vehicles</dt><dd>${nf(M.fleet)}</dd><dt>Family gain</dt><dd>${ugx(M.welfare)}/month</dd><dt>Net jobs</dt><dd>${nf(M.jobs)}</dd><dt>Operator NPV</dt><dd>${usdm(M.npv, 0)}</dd><dt>Suburbs profitable in most futures</dt><dd>${SUBS.filter((s) => bestSt(s.sid).pProfit >= 0.5).length} of 100</dd></dl>`;
+}
+
+/* ---------- Families ---------- */
+function families() {
+  const M = mix();
+  const bodaB = sum(M.st.map((x) => x.bodaEarn[1] * 1)) / M.st.length;
+  const ag = M.st.filter((x, i) => M.ids[i].endsWith("|1"));
+  $("famTiles").innerHTML = tile("Average gain", ugx(M.welfare), "per household per month") + tile("Highest-gain suburb", ugx(Math.max(...M.st.map((x) => x.welfare[1]))), SUBS[M.st.indexOf(M.st.reduce((a, b) => (b.welfare[1] > a.welfare[1] ? b : a)))].name)
+    + tile("Boda rider earnings", Math.round(100 * sum(M.st.map((x) => x.bodaPct[1])) / M.st.length) + "%", `about ${ugx(bodaB)} per rider per month, average suburb`) + tile("Ex-boda riders re-employed", nf(sum(M.st.map((x) => x.exBoda[1]))), "as shuttle drivers and couriers");
+  // usage by income third
+  const third = [["Poorest third", (x) => x.useLow[1]], ["Richest third", (x) => x.useHigh[1]]];
+  const segs = [...new Set(SUBS.map((s) => s.segment))];
+  const rows = segs.map((sg) => { const ix = SUBS.map((s, i) => (s.segment === sg ? i : -1)).filter((i) => i >= 0); return { sg, v: third.map(([, f]) => med(ix.map((i) => f(M.st[i])))) }; });
+  const svg = $("useChart"), w = 560, h = 250, m = { l: 130, r: 20, t: 10, b: 26 };
+  const mx = Math.max(0.05, ...rows.flatMap((r) => r.v)) * 1.1, bw = (h - m.t - m.b) / rows.length;
+  const cols = ["var(--blue)", "var(--orange)"];
+  $("useKey").innerHTML = third.map(([l], i) => `<span><i class="sq" style="background:${cols[i]}"></i>${l}</span>`).join("");
+  let g = "";
+  rows.forEach((r, j) => { const y0 = m.t + j * bw; g += `<text x="${m.l - 8}" y="${y0 + bw / 2 + 4}" text-anchor="end">${r.sg}</text>`; r.v.forEach((v, k) => { const bh = (bw - 10) / 2 - 1; const yy = y0 + 5 + k * (bh + 2); const ww = (v / mx) * (w - m.l - m.r); g += `<rect x="${m.l}" y="${yy}" width="${Math.max(1, ww)}" height="${bh}" rx="3" fill="${cols[k]}" data-t="<b>${r.sg}</b><br>${third[k][0]}: ${Math.round(v * 100)}% of trips by feeder"/><text x="${m.l + ww + 4}" y="${yy + bh / 2 + 4}">${Math.round(v * 100)}%</text>`; }); });
+  svg.innerHTML = g; hover(svg);
+  // gain by segment dot strip
+  const s2 = $("segChart"); const all = M.st.map((x) => x.welfare); const lo = Math.min(0, ...all.map((v) => v[0])), hi = Math.max(...all.map((v) => v[2]));
+  const sx = (v) => m.l + ((v - lo) / (hi - lo)) * (w - m.l - m.r);
+  let g2 = `<line class="ax" x1="${sx(0)}" x2="${sx(0)}" y1="${m.t}" y2="${h - m.b}"/>`;
+  [0, 0.25, 0.5, 0.75, 1].forEach((f) => { const v = lo + f * (hi - lo); g2 += `<text x="${sx(v)}" y="${h - 8}" text-anchor="middle">${nf(v / 1000, 0)}k</text>`; });
+  segs.forEach((sg, j) => { const y0 = m.t + j * bw + bw / 2; g2 += `<text x="${m.l - 8}" y="${y0 + 4}" text-anchor="end">${sg}</text>`; SUBS.forEach((s, i) => { if (s.segment !== sg) return; const v = M.st[i].welfare; const yy = y0 + ((i * 37) % 17 - 8); g2 += `<line x1="${sx(v[0])}" x2="${sx(v[2])}" y1="${yy}" y2="${yy}" stroke="var(--blue-l)" stroke-width="1"/><circle cx="${sx(v[1])}" cy="${yy}" r="4" fill="${famOf(M.ids[i]).c}" stroke="#fcfcfb" stroke-width="1.5" data-t="<b>${s.name}</b><br>${ugx(v[1])}/month (${ugx(v[0])} to ${ugx(v[2])})<br>${label(M.ids[i])}"/>`; }); });
+  s2.innerHTML = g2; hover(s2);
+  // four families
+  const pick = (f) => SUBS.map((s, i) => [f(s), i]).sort((a, b) => b[0] - a[0])[0][1];
+  const cases = [
+    ["A low-income family far from the road", pick((s) => s.gap_share * (2 - s.rwi))],
+    ["A busy inner-city family", pick((s) => (s.segment === "Inner city" ? s.pop : 0))],
+    ["A family on the urban edge", pick((s) => s.d_cbd_km * (s.gap_share + 0.1))],
+    ["A boda rider's family", pick((s) => -bestSt(s.sid).bodaEarn[1])],
+  ];
+  $("famCards").innerHTML = cases.map(([t, i]) => { const s = SUBS[i], x = M.st[i]; const boda = t.startsWith("A boda");
+    return `<div class="card"><h4>${t}</h4><div class="note">${s.name} · ${s.segment}</div><p style="margin:6px 0 0;font-size:13.5px">${boda
+      ? `Bodas here lose the most trips to the feeder. A rider's earnings change by about <b>${ugx(x.bodaEarn[1])}</b> a month (${Math.round(x.bodaPct[1] * 100)}%) (${ugx(x.bodaEarn[0])} to ${ugx(x.bodaEarn[2])} across futures). About ${nf(x.exBoda[1])} riders move into the ${nf(x.drivers[1])} shuttle-driving and ${nf(x.couriers[1])} courier jobs.`
+      : `Gains about <b>${ugx(x.welfare[1])}</b> a month in money and time (${ugx(x.welfare[0])} to ${ugx(x.welfare[2])}). Fares average ${ugx(x.fare[1])}${x.agg[1] > 0 ? `, and ordering from local shops is worth ${ugx(x.agg[1])} a month on average across households` : ""}. ${Math.round(x.useLow[1] * 100)}% of the poorest third's trips towards the hub go by feeder.`}</p><p class="note" style="margin:6px 0 0">${label(M.ids[i])}</p></div>`; }).join("");
+}
+function hover(svg) { svg.querySelectorAll("[data-t]").forEach((el) => { el.addEventListener("mousemove", (e) => showTip(e, el.getAttribute("data-t"))); el.addEventListener("mouseleave", hideTip); }); }
+
+/* ---------- Jobs ---------- */
+function jobs() {
+  const sets = [["Best option mix", (sid) => bestSt(sid)], ["All e-shuttles, learning fares + aggregator", (sid) => GRID[sid]["e14|learn|1"]], ["All diesel taxis, learning fares + aggregator", (sid) => GRID[sid]["ice14|learn|1"]]];
+  const parts = [["drivers", "Drivers", "#2a78d6"], ["tech", "Depot and charging", "#1baf7a"], ["plant", "Kiira plant (job-years)", "#6250d6"], ["couriers", "Couriers", "#eb6834"], ["shopJobs", "Shops (net)", "#eda100"]];
+  $("jobKey").innerHTML = parts.map(([, l, c]) => `<span><i class="sq" style="background:${c}"></i>${l}</span>`).join("") + `<span><i class="sq" style="background:#e34948"></i>Boda riders leaving</span>`;
+  const data = sets.map(([l, f]) => ({ l, v: parts.map(([k]) => sum(SUBS.map((s) => f(s.sid)[k][1]))), lost: sum(SUBS.map((s) => f(s.sid).bodaLost[1])) }));
+  const svg = $("jobChart"), w = 1000, h = 260, m = { l: 300, r: 70, t: 10, b: 24 };
+  const mx = Math.max(...data.map((d) => sum(d.v))), mn = -Math.max(...data.map((d) => d.lost), 1);
+  const sx = (v) => m.l + ((v - mn) / (mx - mn)) * (w - m.l - m.r), bw = (h - m.t - m.b) / data.length;
+  let g = `<line class="ax" x1="${sx(0)}" x2="${sx(0)}" y1="${m.t}" y2="${h - m.b}"/>`;
+  data.forEach((d, j) => {
+    const y = m.t + j * bw + 10, bh = bw - 20; let x0 = 0;
+    g += `<text x="${m.l - 10}" y="${y + bh / 2 + 4}" text-anchor="end">${d.l}</text>`;
+    d.v.forEach((v, k) => { g += `<rect x="${sx(x0) + (k ? 1 : 0)}" y="${y}" width="${Math.max(0, sx(x0 + v) - sx(x0) - (k ? 1 : 0))}" height="${bh}" rx="2" fill="${parts[k][2]}" data-t="<b>${d.l}</b><br>${parts[k][1]}: ${nf(v)}"/>`; x0 += v; });
+    g += `<rect x="${sx(-d.lost)}" y="${y}" width="${Math.max(0, sx(0) - sx(-d.lost) - 1)}" height="${bh}" rx="2" fill="#e34948" data-t="<b>${d.l}</b><br>Boda riders leaving: ${nf(d.lost)}"/>`;
+    g += `<text x="${sx(x0) + 6}" y="${y + bh / 2 + 4}" class="lbl">net ${nf(x0 - d.lost)}</text>`;
+  });
+  svg.innerHTML = g; hover(svg);
+  const b = data[0], e = data[1], d = data[2];
+  $("jobTiles").innerHTML = tile("Net jobs, best mix", nf(sum(b.v) - b.lost), "") + tile("Extra jobs from building in Uganda", nf(sum(e.v) - sum(d.v)), "e-shuttles vs imported diesel taxis") + tile("Boda riders leaving the trade", nf(b.lost), "of about " + nf(sum(SUBS.map((s) => bestSt(s.sid).bodaB0[1]))) + " serving these suburbs") + tile("Ex-boda riders re-employed", nf(sum(SUBS.map((s) => bestSt(s.sid).exBoda[1]))), "as drivers and couriers");
+}
+
+/* ---------- Routes table ---------- */
+function routes() {
+  const rows = SUBS.map((s) => ({ s, x: bestSt(s.sid), id: bestId(s.sid) })).sort((a, b) => b.x.riders[1] - a.x.riders[1]);
+  $("routeTable").innerHTML = `<tr><th>Suburb → hub</th><th>Route km</th><th>Riders/day</th><th>Vehicles</th><th>Peak load</th><th>Avg fare</th><th style="white-space:normal">Fares by period<br><span class="note">early · am · mid · pm · eve · late</span></th><th>Best option</th></tr>` +
+    rows.map(({ s, x, id }) => `<tr><td>${s.name} → ${s.hub}</td><td>${nf(s.route_km, 1)}</td><td>${nf(x.riders[1])}</td><td>${nf(x.fleet[1])}</td><td>${Math.round(x.peakLoad[1] * 100)}%</td><td>${nf(x.fare[1])}</td><td>${x.fares.map((f) => nf(f)).join(" · ")}</td><td style="text-align:left;white-space:normal;min-width:200px"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${famOf(id).c};margin-right:4px"></span>${label(id)}</td></tr>`).join("");
+}
+
+/* ---------- Electric 14-seater ---------- */
+function ev() {
+  const diffs = [], pe = [], cE = [], cD = [];
+  SUBS.forEach((s) => { const g = GRID[s.sid], e = g["e14|learn|1"], d = g["ice14|learn|1"]; e.npvRuns.forEach((v, i) => diffs.push(v - d.npvRuns[i])); pe.push(pEV(s.sid)); cE.push(e.costRide); cD.push(d.costRide); });
+  const fuel = sum(SUBS.map((s) => GRID[s.sid]["ice14|learn|1"].fuelUsd[1])), co2E = sum(SUBS.map((s) => GRID[s.sid]["e14|learn|1"].co2[1])), co2D = sum(SUBS.map((s) => GRID[s.sid]["ice14|learn|1"].co2[1]));
+  const adv = sum(SUBS.map((s) => GRID[s.sid]["e14|learn|1"].npv[1] - GRID[s.sid]["ice14|learn|1"].npv[1]));
+  $("evTiles").innerHTML = tile("E-shuttle earns more", Math.round(diffs.filter((v) => v > 0).length / diffs.length * 100) + "%", `of ${nf(diffs.length)} suburb-futures`) + tile("Lowest chance in any suburb", Math.round(Math.min(...pe) * 100) + "%", "the e-shuttle still wins most futures everywhere")
+    + tile("Extra 10-year value", usdm(adv, 0), "all 100 suburbs, median futures") + tile("Diesel imports avoided", usdm(fuel, 1) + "/yr", "fuel the diesel fleet would burn") + tile("CO₂ difference", nf(co2E - co2D) + " t/yr", "e-shuttle fleet vs diesel fleet")
+    + tile("Cost per ride", ugx(med(cE.map((c) => c[1]))) + " vs " + ugx(med(cD.map((c) => c[1]))), "e-shuttle vs diesel, median suburb");
+  // histogram
+  const svg = $("evHist"), w = 560, h = 260, m = { l: 40, r: 10, t: 10, b: 36 };
+  const lo = Math.min(0, ...diffs), hi = Math.max(...diffs), nb = 24, bwid = (hi - lo) / nb;
+  const bins = new Array(nb).fill(0); diffs.forEach((v) => bins[Math.min(nb - 1, Math.floor((v - lo) / bwid))]++);
+  const my = Math.max(...bins), sx = (v) => m.l + ((v - lo) / (hi - lo)) * (w - m.l - m.r), sy = (c) => h - m.b - (c / my) * (h - m.t - m.b);
+  let g = "";
+  bins.forEach((c, i) => { const a = lo + i * bwid; g += `<rect x="${sx(a) + 1}" y="${sy(c)}" width="${Math.max(1, sx(a + bwid) - sx(a) - 2)}" height="${h - m.b - sy(c)}" rx="2" fill="${a + bwid <= 0 ? "#898781" : "#1baf7a"}" data-t="${usdm(a, 2)} to ${usdm(a + bwid, 2)}: ${c} suburb-futures"/>`; });
+  g += `<line class="ax" x1="${m.l}" x2="${w - m.r}" y1="${h - m.b}" y2="${h - m.b}"/><line x1="${sx(0)}" x2="${sx(0)}" y1="${m.t}" y2="${h - m.b}" stroke="var(--ink)" stroke-dasharray="3 3"/>`;
+  (lo < -0.05 * hi ? [lo, 0, hi / 2, hi] : [0, hi / 2, hi]).forEach((v) => (g += `<text x="${sx(v)}" y="${h - m.b + 14}" text-anchor="middle">${usdm(v, 1)}</text>`));
+  g += `<text x="${w - m.r}" y="${h - 4}" text-anchor="end" class="lbl">E-shuttle minus diesel, 10-year NPV per suburb</text><text x="${sx(0) + 4}" y="${m.t + 10}">diesel better ← | → e-shuttle better</text>`;
+  svg.innerHTML = g; hover(svg);
+  // cost per ride ranges
+  const vs = [["e14|learn|1", "Kiira e-shuttle 14", "#1baf7a"], ["midi|learn|1", "Kayoola e-midi 8 m", "#6250d6"], ["ice14|learn|1", "Diesel taxi 14", "#898781"]];
+  $("cprKey").innerHTML = vs.map(([, l, c]) => `<span><i class="sq" style="background:${c}"></i>${l}</span>`).join("");
+  const rows = vs.map(([id, l, c]) => { const v = SUBS.filter((s) => GRID[s.sid][id]).map((s) => GRID[s.sid][id].costRide); return { l, c, lo: med(v.map((x) => x[0])), md: med(v.map((x) => x[1])), hi: med(v.map((x) => x[2])), n: v.length }; });
+  const c2 = $("cprChart"), mx = Math.max(...rows.map((r) => r.hi)) * 1.1, bh = (h - m.t - m.b) / rows.length, s2 = (v) => 150 + (v / mx) * (w - 160);
+  let g2 = "";
+  rows.forEach((r, j) => { const y = m.t + j * bh + bh / 2; g2 += `<text x="140" y="${y + 4}" text-anchor="end">${r.l}</text><rect x="${s2(r.lo)}" y="${y - 9}" width="${s2(r.hi) - s2(r.lo)}" height="18" rx="4" fill="${r.c}" opacity=".3"/><rect x="${s2(r.md) - 2}" y="${y - 13}" width="4" height="26" rx="2" fill="${r.c}" data-t="<b>${r.l}</b><br>median ${ugx(r.md)} per ride<br>${ugx(r.lo)} to ${ugx(r.hi)} across futures<br>${r.n} suburbs"/><text x="${s2(r.hi) + 6}" y="${y + 4}" class="lbl">${ugx(r.md)}</text>`; });
+  g2 += `<line class="ax" x1="150" x2="${w - 10}" y1="${h - m.b}" y2="${h - m.b}"/>` + [0, 0.5, 1].map((f) => `<text x="${s2(f * mx)}" y="${h - m.b + 14}" text-anchor="middle">${nf(f * mx)}</text>`).join("") + `<text x="${w - 10}" y="${h - 4}" text-anchor="end" class="lbl">UGX per ride</text>`;
+  c2.innerHTML = g2; hover(c2);
+}
+
+/* ---------- Aggregator ---------- */
+function agg() {
+  const st = SUBS.map((s) => GRID[s.sid]["e14|learn|1"]);
+  const orders = sum(st.map((x) => x.orders[1])), shops = sum(st.map((x) => x.shopsOn[1])), cour = sum(st.map((x) => x.couriers[1])), plat = sum(st.map((x) => x.platform[1]));
+  const lossSubs = st.filter((x) => x.platform[1] < 0).length;
+  $("aggTiles").innerHTML = tile("Orders per day", nf(orders), "all 100 suburbs, median future") + tile("Shops listed", nf(shops), "of " + nf(sum(SUBS.map((s) => s.pop / A.DEFAULTS.shopsPer))) + " small shops")
+    + tile("Courier jobs", nf(cour), "about 40 deliveries a day each") + tile("Saving per ordering family", ugx(med(SUBS.map((s, i) => st[i].agg[1] * (s.pop / A.DEFAULTS.hhSize) / Math.max(1, st[i].orders[1] * 6 / A.DEFAULTS.ordersWeek)))), "per month, after the delivery fee")
+    + tile("Extra margin per shop", ugx(med(st.map((x) => x.shopGain[1]))), "per month after commission") + tile("Platform profit", usdm(plat, 2) + "/yr", lossSubs ? `${lossSubs} suburbs lose money on their own` : "covers its costs in every suburb at these settings");
+  const steps = [["Shop", "lists goods, packs a tote"], ["Hub", "totes consolidated"], ["Feeder, off-peak", "carries totes in empty seats"], ["Stop", "courier collects"], ["Door", "on foot or e-bike, last 300 m"]];
+  let g = ""; const bw = 170, gap = (1000 - steps.length * bw) / (steps.length - 1);
+  steps.forEach(([t, d], i) => { const x = i * (bw + gap); g += `<rect x="${x}" y="20" width="${bw}" height="70" rx="10" fill="#fcfcfb" stroke="#c3c2b7"/><text x="${x + bw / 2}" y="50" text-anchor="middle" class="lbl" style="font-size:14px">${t}</text><text x="${x + bw / 2}" y="70" text-anchor="middle">${d}</text>`; if (i < steps.length - 1) g += `<path d="M${x + bw + 4},55 L${x + bw + gap - 6},55" stroke="#eb6834" stroke-width="2.5" marker-end="url(#ah)"/>`; });
+  $("aggFlow").innerHTML = `<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#eb6834"/></marker></defs>` + g;
+}
+
+/* ---------- Roll-out map ---------- */
+const map2 = L.map("map2", { zoomSnap: 0.25 });
+tiles.grey().addTo(map2);
+const poly2 = {};
+const sub2 = L.geoJSON(K.geo.suburbs, { style: () => ({ weight: 0.6, color: "#fff", fillOpacity: 0.85, fillColor: "#e1e0d9" }), onEachFeature: (f, l) => { poly2[f.properties.sid] = l; l.bindTooltip(() => roll2Tip(f.properties.sid), { className: "tt", sticky: true }); } }).addTo(map2);
+map2.fitBounds(sub2.getBounds(), { padding: [10, 10] });
+const leg2 = L.control({ position: "bottomleft" }); leg2.onAdd = () => { const d = L.DomUtil.create("div", "legend"); d.innerHTML = "<b>Riders per day</b>" + ["not started", "under 500", "500–1,500", "1,500–3,000", "3,000–6,000", "6,000–10,000", "over 10,000"].map((t, i) => `<div><i style="background:${i ? SEQ[i - 1] : "#e1e0d9"}"></i>${t}</div>`).join(""); return d; }; leg2.addTo(map2);
+const RB = [500, 1500, 3000, 6000, 10000];
+let NET = null, wkI = 1e9, timer = null;
+function setNet() { NET = NETS[$("netSel").value]; $("wk").max = NET.weeks.length - 1; wkI = Math.min(wkI, NET.weeks.length - 1); $("wk").value = wkI; drawWeek(); drawRoll(); }
+$("netSel").onchange = setNet;
+function roll2Tip(sid) { const w = NET.weeks[wkI], v = w.by[sid] || [0, 0, 0, 0, 0]; const s = BY[sid]; return `<b>${s.name}</b><br>${v[0] > 0 ? `${nf(v[0])} riders/day · fare ${ugx(v[1])}<br>${nf(v[2])} boda riders · ${nf(v[3])} orders/day · ${Math.round(v[4] * 100)}% aware` : `Waiting for vehicles (starts week ${NET.startWeek[SUBS.findIndex((x) => x.sid === sid)] ?? "–"})`}`; }
+function drawWeek() {
+  const w = NET.weeks[wkI];
+  SUBS.forEach((s) => { const v = (w.by[s.sid] || [0])[0]; poly2[s.sid].setStyle({ fillColor: v <= 0 ? "#e1e0d9" : SEQ[RB.filter((b) => v > b).length] }); });
+  const yr = 2027 + Math.floor(w.wk / 52);
+  $("wkO").textContent = `Week ${w.wk} · ${yr}`;
+  $("rollTiles").innerHTML = tile("Suburbs running", w.live, "of 100") + tile("Riders per day", nf(w.riders), "") + tile("Vehicles", nf(w.fleet), "") + tile("Orders per day", nf(w.orders), "") + tile("Boda riders", nf(w.boda), "serving these suburbs");
+  const X = document.getElementById("rollX"); if (X) { const x = 30 + (wkI / (NET.weeks.length - 1)) * 320; X.setAttribute("x1", x); X.setAttribute("x2", x); }
+}
+function drawRoll() {
+  const svg = $("rollChart"), w = 360, h = 200, m = { l: 30, r: 10, t: 8, b: 20 }, ws = NET.weeks;
+  const ser = [["riders", "var(--blue)", "riders/day"], ["orders", "var(--aqua)", "orders/day"]];
+  $("rollKey").innerHTML = ser.map(([, c, l]) => `<span><i style="background:${c}"></i>${l}</span>`).join("");
+  const mx = Math.max(...ws.map((d) => Math.max(d.riders, d.orders)));
+  const x = (i) => m.l + (i / (ws.length - 1)) * (w - m.l - m.r), y = (v) => h - m.b - (v / mx) * (h - m.t - m.b);
+  let g = `<line class="ax" x1="${m.l}" x2="${w - m.r}" y1="${h - m.b}" y2="${h - m.b}"/><text x="${m.l - 3}" y="${m.t + 8}" text-anchor="end">${nf(mx / 1000)}k</text><text x="${m.l}" y="${h - 5}">2027</text><text x="${w - m.r}" y="${h - 5}" text-anchor="end">week ${ws[ws.length - 1].wk}</text>`;
+  ser.forEach(([k, c]) => (g += `<path d="${ws.map((d, i) => (i ? "L" : "M") + x(i).toFixed(1) + "," + y(d[k]).toFixed(1)).join("")}" fill="none" stroke="${c}" stroke-width="2"/>`));
+  g += `<line id="rollX" y1="${m.t}" y2="${h - m.b}" stroke="var(--ink)" stroke-dasharray="3 3"/>`;
+  svg.innerHTML = g; drawWeek();
+}
+$("wk").oninput = (e) => { wkI = +e.target.value; drawWeek(); };
+$("play").onclick = () => {
+  if (timer) { clearInterval(timer); timer = null; $("play").textContent = "▶ Play"; return; }
+  if (wkI >= NET.weeks.length - 1) wkI = 0;
+  $("play").textContent = "❚❚ Pause";
+  timer = setInterval(() => { wkI++; if (wkI >= NET.weeks.length - 1) { wkI = NET.weeks.length - 1; clearInterval(timer); timer = null; $("play").textContent = "▶ Play"; } $("wk").value = wkI; drawWeek(); }, 90);
+};
+
+/* ---------- Method table ---------- */
+$("uncTable").innerHTML = "<tr><th>Uncertain input</th><th>Low</th><th>High</th></tr>" + A.UNCERTAIN.map((u) => `<tr><td>${u.label}</td><td>${nf(u.lo, u.lo < 10 ? 2 : 0)}</td><td>${nf(u.hi, u.hi < 10 ? 2 : 0)}</td></tr>`).join("")
+  + "<tr><th>Fixed assumption</th><th colspan=2>Value</th></tr>" + [["Sample households per suburb", A.DEFAULTS.agents], ["Weeks simulated", A.DEFAULTS.weeks], ["Household size", A.DEFAULTS.hhSize], ["Launch fleet (share of plan)", "85%"], ["Vehicle delivery lead time", "8 weeks"], ["E-shuttle price", "USD 42,000"], ["Diesel taxi price", "USD 30,000"], ["Diesel use", "0.11 L/km"], ["E-shuttle energy", "0.22 kWh/km"], ["Boda bike rent", "UGX 15,000/day"], ["Order value", "UGX 15,000"], ["Couriers", "40 orders/day each"], ["Discount rate", "12% real, 10 years"]].map(([a, b]) => `<tr><td>${a}</td><td colspan=2>${b}</td></tr>`).join("");
+
+function refresh(light) { restyle(); heroTiles(); if (!light) { families(); jobs(); routes(); ev(); agg(); } if (curSid != null && !light) openSuburb(curSid); }
+refresh(); setNet();
+if (/autorun/.test(location.hash)) { $("reps").value = "4"; startRun(); }
+const hs = location.hash.match(/s=(\d+)/); if (hs && BY[+hs[1]]) { openSuburb(+hs[1]); polyBy[+hs[1]] && map.fitBounds(polyBy[+hs[1]].getBounds(), { maxZoom: 13 }); }
+</script>
+</body>
+</html>
