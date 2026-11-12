@@ -48,6 +48,7 @@ a{color:var(--blue)}
 .end a.btn{display:inline-block;margin:10px 6px;padding:10px 18px;border-radius:8px;background:var(--ink);color:#fff;text-decoration:none;font-weight:600}
 .end a.btn.alt{background:var(--surface);color:var(--ink);border:1px solid var(--rule)}
 .note{font-size:12.5px;color:var(--muted)}
+.others a{font-size:14px;padding:6px 12px;border:1px solid var(--rule);border-radius:999px;background:var(--surface);color:var(--ink);text-decoration:none}
 @media (max-width:860px){
   #story{grid-template-columns:1fr;gap:0}
   #fig{order:-1;top:40px;height:58vh;z-index:5;background:var(--bg)}
@@ -71,9 +72,9 @@ a{color:var(--blue)}
   <div id="fig"><div id="stage"><canvas id="cv"></canvas><svg id="over"></svg></div><div id="cap"></div></div>
 </div>
 <div class="end">
-  <h2>Explore every suburb yourself</h2>
+  <h2>More stories, and every suburb yourself</h2>
   <p>Change what matters most, the price of diesel, demand or the aggregator's fees, and re-run all the agents in your browser.</p>
-  <a class="btn" href="../futures/">Open the futures lab</a><a class="btn alt" href="../">The network model</a>
+  <div class="others" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:6px 0 14px"><a href="futures/">1,200 futures</a><a href="vehicles/">From Jinja to the street</a><a href="shops/">A shopkeeper's week</a><a href="day/">A day on the network</a></div><a class="btn" href="../futures/">Open the futures lab</a><a class="btn alt" href="../">The network model</a>
   <p class="note" style="margin-top:22px">Households: 90 sample families per suburb, each standing for a few hundred real ones; one boda dot = 10 riders; one shop dot = 20 small shops. Best options use the lab's default weights and the median of 12 futures. Map: OpenStreetMap, WorldPop, Meta RWI. Model and story by Gava Charles.</p>
 </div>
 
