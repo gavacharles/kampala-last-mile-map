@@ -148,14 +148,15 @@ footer{max-width:1280px;margin:0 auto;padding:18px 16px 40px;font-size:12.5px;co
 
 <section id="map-s">
   <h2>Best three options for each suburb</h2>
-  <p class="sub">Hover over a suburb to see its best three options. Click it for the full picture and to watch its two years unfold. There are up to 54 options per suburb: three vehicles (Kiira 14-seat e-shuttle, Kayoola 8 m e-midi where roads allow, a diesel 14-seat taxi for comparison), three ways to set fares (flat UGX 1,000, learning dynamic, inclusive with a city transfer discount and a 20% green grant) and six aggregator settings (none, door delivery, pickup at the stop, shop restocking, or door or pickup combined with restocking).</p>
+  <p class="sub">Hover over a suburb to see its best three options. Tick <b>Charging depots</b> or colour by <b>Year the vehicles arrive</b> to follow the fleet (the story <a href="../story/vehicles/">From Jinja to the street</a> tells it). Click it for the full picture and to watch its two years unfold. There are up to 54 options per suburb: three vehicles (Kiira 14-seat e-shuttle, Kayoola 8 m e-midi where roads allow, a diesel 14-seat taxi for comparison), three ways to set fares (flat UGX 1,000, learning dynamic, inclusive with a city transfer discount and a 20% green grant) and six aggregator settings (none, door delivery, pickup at the stop, shop restocking, or door or pickup combined with restocking).</p>
   <div class="mapbar">
     <label>Colour suburbs by <select id="layer">
-      <option value="best">Best option</option><option value="agg">Best aggregator setting</option><option value="plat">Chance the aggregator pays its way</option><option value="restock">Shops restocking through the aggregator</option><option value="welfare">Gain per household (UGX/month)</option><option value="jobs">Net jobs</option><option value="npv">Operator NPV, best option (USD m)</option><option value="pev">Chance e-shuttle beats diesel</option><option value="boda">Boda rider earnings change</option><option value="riders">Riders per day</option>
+      <option value="best">Best option</option><option value="fleet">Vehicles (best option)</option><option value="year">Year the vehicles arrive from Kiira</option><option value="agg">Best aggregator setting</option><option value="plat">Chance the aggregator pays its way</option><option value="restock">Shops restocking through the aggregator</option><option value="welfare">Gain per household (UGX/month)</option><option value="jobs">Net jobs</option><option value="npv">Operator NPV, best option (USD m)</option><option value="pev">Chance e-shuttle beats diesel</option><option value="boda">Boda rider earnings change</option><option value="riders">Riders per day</option>
     </select></label>
     <label>Base <select id="base"><option value="grey">Grey canvas</option><option value="sat">Satellite</option></select></label>
     <label><input type="checkbox" id="showRoutes" checked> Feeder routes</label>
     <label><input type="checkbox" id="showCorr"> Wholesale corridors</label>
+    <label><input type="checkbox" id="showDep"> Charging depots and the Kiira plant</label>
   </div>
   <div class="mapwrap"><div id="map" class="map"></div><div id="panel"><h3>Pick a suburb</h3><p class="note">Hover for the best three; click for detail, the week-by-week film and every option with its spread across futures.</p><div id="mixBox"></div></div></div>
 </section>
@@ -424,6 +425,21 @@ function drawCorr() {
     L.geoJSON(f, { style: { color: "#1baf7a", weight: 1.5 + 9 * Math.sqrt(v / mx), opacity: 0.85 } }).bindTooltip(`<b>${f.properties.hub}</b><br>UGX ${nf(v, 1)}m of shop stock a day from the wholesale district`, { className: "tt", sticky: true }).addTo(corrL); });
   L.circleMarker(WHOLESALE, { radius: 9, color: "#fff", weight: 2, fillColor: "#0b0b0b", fillOpacity: 1 }).bindTooltip("Kikuubo and Owino wholesale district", { className: "tt" }).addTo(corrL);
 }
+// Vehicles: arrival year from the plant queue (network run of the best options), nearest charging depot, and the Kiira plant in Jinja
+const arriveYear = (sid) => 2027 + Math.floor(((NETS.best && NETS.best.startWeek && NETS.best.startWeek[SUBS.findIndex((s) => s.sid === sid)]) || 0) / 52);
+const DEPOTS = K.geo.depots.features.map((f) => ({ p: f.properties, lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0] }));
+const depotOf = (sid) => { const s = BY[sid]; let b = DEPOTS[0], bd = 1e9; DEPOTS.forEach((d) => { const dd = (d.lon - s.lon) ** 2 + (d.lat - s.lat) ** 2; if (dd < bd) { bd = dd; b = d; } }); return b; };
+const depL = L.layerGroup();
+function drawDep() {
+  depL.clearLayers();
+  const veh = {}; SUBS.forEach((s) => { const d = depotOf(s.sid).p.depot; veh[d] = (veh[d] || 0) + bestSt(s.sid).fleet[1]; });
+  DEPOTS.forEach((d) => { const v = veh[d.p.depot] || 0;
+    L.circleMarker([d.lat, d.lon], { radius: 5 + Math.sqrt(v) / 2.2, color: "#fff", weight: 2, fillColor: "#1baf7a", fillOpacity: 0.9 })
+      .bindTooltip(`<b>${d.p.label}</b><br>${nf(v)} vehicles charging overnight (best options)<br>${d.p.site_kind} · ${d.p.grid_class}<br>${nf(d.p.dist_substation_m / 1000, 1)} km to a substation`, { className: "tt", sticky: true }).addTo(depL); });
+  const plant = L.marker([0.405, 32.79], { icon: L.divIcon({ className: "", html: '<div style="background:#0b0b0b;color:#fff;font:600 12px system-ui;padding:4px 8px;border-radius:6px;white-space:nowrap">Kiira plant, Jinja → 80 km</div>', iconSize: null }) });
+  plant.bindTooltip(`Every e-shuttle is built at the Kiira Vehicle Plant in Jinja. At 40% of its output, the best-option fleet of ${nf(sum(SUBS.map((s) => bestSt(s.sid).fleet[1])))} vehicles takes until ${Math.max(...SUBS.map((s) => arriveYear(s.sid)))} to deliver.`, { className: "tt" }).addTo(depL);
+}
+$("showDep").onchange = (e) => { if (e.target.checked) { drawDep(); depL.addTo(map); } else map.removeLayer(depL); };
 $("showCorr").onchange = (e) => { if (e.target.checked) { drawCorr(); corrL.addTo(map); } else map.removeLayer(corrL); };
 $("showRoutes").onchange = (e) => (e.target.checked ? routeL.addTo(map) : map.removeLayer(routeL));
 const legend = L.control({ position: "bottomleft" });
@@ -444,6 +460,8 @@ function layerVal(sid, key) {
     case "boda": return st.bodaEarn[1];
     case "riders": return st.riders[1];
     case "plat": return st.pPlatform;
+    case "fleet": return st.fleet[1];
+    case "year": return arriveYear(sid);
     case "restock": return st.rsOn[1];
   }
 }
@@ -456,6 +474,10 @@ function restyle() {
     colorFn = (sid) => famOf(bestId(sid)).c;
     const cnt = {}; SUBS.forEach((s) => { const f = famOf(bestId(s.sid)).key; cnt[f] = (cnt[f] || 0) + 1; });
     html = "<b>Best option</b>" + FAM.map((f) => `<div><i style="background:${f.c}"></i>${f.label} <span class="note">${cnt[f.key] || 0}</span></div>`).join("");
+  } else if (key === "year") {
+    const YC = ["#2a78d6", "#1baf7a", "#eda100", "#eb6834", "#6250d6"], ys = [...new Set(SUBS.map((s) => arriveYear(s.sid)))].sort();
+    colorFn = (sid) => YC[Math.min(YC.length - 1, ys.indexOf(arriveYear(sid)))];
+    html = "<b>Year the fleet arrives</b><div class='note'>Kiira output shared in priority order</div>" + ys.map((y, i) => `<div><i style="background:${YC[Math.min(YC.length - 1, i)]}"></i>${y} <span class="note">${SUBS.filter((s) => arriveYear(s.sid) === y).length} suburbs</span></div>`).join("");
   } else if (key === "agg") {
     colorFn = (sid) => aggOf(bestId(sid))[2];
     const cnt = {}; SUBS.forEach((s) => { const a = aggOf(bestId(s.sid))[0]; cnt[a] = (cnt[a] || 0) + 1; });
@@ -476,7 +498,7 @@ function restyle() {
     const vals = SUBS.map((s) => layerVal(s.sid, key)); const b = binner(vals, SEQ);
     colorFn = (sid) => b.f(layerVal(sid, key));
     const fm = key === "npv" ? (v) => usdm(v, 1) : (v) => nf(v);
-    const names = { welfare: "Gain per household (UGX/month)", jobs: "Net jobs", npv: "Operator NPV (USD m)", riders: "Riders per day", restock: "Shops restocking via the aggregator" };
+    const names = { fleet: "Vehicles in the best option", welfare: "Gain per household (UGX/month)", jobs: "Net jobs", npv: "Operator NPV (USD m)", riders: "Riders per day", restock: "Shops restocking via the aggregator" };
     html = `<b>${names[key]}</b>` + SEQ.map((c, i) => `<div><i style="background:${c}"></i>${i === 0 ? "up to " + fm(b.qs[0]) : i === SEQ.length - 1 ? "over " + fm(b.qs[i - 1]) : fm(b.qs[i - 1]) + " – " + fm(b.qs[i])}</div>`).join("");
   }
   SUBS.forEach((s) => styleSuburb(s.sid));
@@ -512,9 +534,9 @@ function openSuburb(sid) {
    <dt>Riders per day</dt><dd>${nf(st.riders[1])} <span class="note">(${nf(st.riders[0])}–${nf(st.riders[2])})</span></dd>
    <dt>Average fare</dt><dd>${ugx(st.fare[1])}</dd>
    <dt>Fares by period</dt><dd>${st.fares.map((f) => nf(f)).join(" · ")}</dd>
-   <dt>Vehicles</dt><dd>${nf(st.fleet[1])}</dd>
+   <dt>Vehicles</dt><dd>${nf(st.fleet[1])} <span class="note">(arrive ${arriveYear(sid)}; ~${nf(st.fleet[1] * 0.3)} idle at midday; charge at depot ${depotOf(sid).p.label})</span></dd>
    <dt>Gain per household</dt><dd>${ugx(st.welfare[1])}/month</dd>
-   <dt>Net jobs</dt><dd>${nf(st.jobsNet[1])} <span class="note">(${nf(st.drivers[1])} drivers, ${nf(st.couriers[1])} couriers, −${nf(st.bodaLost[1])} boda)</span></dd>
+   <dt>Net jobs</dt><dd>${nf(st.jobsNet[1])} <span class="note">(${nf(st.drivers[1])} drivers, ${nf(st.couriers[1])} couriers, ${st.bodaLost[1] >= 0.5 ? "−" + nf(st.bodaLost[1]) + " boda riders" : "no boda riders leave"})</span></dd>
    <dt>Boda earnings</dt><dd>${ugx(st.bodaEarn[1])}/month per rider</dd>
    <dt>Operator NPV</dt><dd>${usdm(st.npv[1], 2)} <span class="note">(${usdm(st.npv[0], 2)} to ${usdm(st.npv[2], 2)})</span></dd>
    <dt>Profitable in</dt><dd>${Math.round(st.pProfit * 100)}% of futures</dd>
@@ -758,7 +780,7 @@ $("play").onclick = () => {
 $("uncTable").innerHTML = "<tr><th>Uncertain input</th><th>Low</th><th>High</th></tr>" + A.UNCERTAIN.map((u) => `<tr><td>${u.label}</td><td>${nf(u.lo, u.lo < 10 ? 2 : 0)}</td><td>${nf(u.hi, u.hi < 10 ? 2 : 0)}</td></tr>`).join("")
   + "<tr><th>Fixed assumption</th><th colspan=2>Value</th></tr>" + [["Sample households per suburb", A.DEFAULTS.agents], ["Weeks simulated", A.DEFAULTS.weeks], ["Household size", A.DEFAULTS.hhSize], ["Launch fleet (share of plan)", "85%"], ["Vehicle delivery lead time", "8 weeks"], ["E-shuttle price", "USD 42,000"], ["Diesel taxi price", "USD 30,000"], ["Diesel use", "0.11 L/km"], ["E-shuttle energy", "0.22 kWh/km"], ["Boda bike rent", "UGX 15,000/day"], ["Order value", "UGX 15,000"], ["Couriers", "40 orders/day each"], ["Discount rate", "12% real, 10 years"]].map(([a, b]) => `<tr><td>${a}</td><td colspan=2>${b}</td></tr>`).join("");
 
-function refresh(light) { restyle(); heroTiles(); if ($("showCorr").checked) drawCorr(); if (!light) { families(); jobs(); routes(); ev(); agg(); } if (curSid != null && !light) openSuburb(curSid); }
+function refresh(light) { restyle(); heroTiles(); if ($("showCorr").checked) drawCorr(); if ($("showDep").checked) drawDep(); if (!light) { families(); jobs(); routes(); ev(); agg(); } if (curSid != null && !light) openSuburb(curSid); }
 refresh(); setNet();
 window.labMap = map; window.labMap2 = map2; window.labPoly = polyBy; window.labOpen = openSuburb; // used by the how-to film script
 if (/autorun/.test(location.hash)) { $("reps").value = "4"; startRun(); }
